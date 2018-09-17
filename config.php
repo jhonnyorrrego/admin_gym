@@ -16,4 +16,7 @@ if (!defined("DB")){
 if (!defined("MOTOR")){
 	define("MOTOR", "mysql");
 }
+
+ini_set("display_errors",true);
+ini_set("safe_mode",false);
 ?>
