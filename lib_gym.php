@@ -39,17 +39,17 @@ class lib_gym{
 		$id=mysqli_insert_id($this->con);
 		return($id);
 	}
-  /*Detecta si el dispositivo en el que se abrio la aplicacion es movil o computador
-  
-  */
-  public function detectar_movil($session){
-    $detect = new Mobile_Detect;
-    $deviceType = ($detect->isMobile() ? ($detect->isTablet() ? 'tablet' : 'phone') : 'computer');
-    
-    if($session){
-      @$_SESSION["dispositivo"] = $deviceType;
-    }
-    return($deviceType);
-  }
+	/*Detecta si el dispositivo en el que se abrio la aplicacion es movil o computador
+
+	*/
+	public function detectar_movil($session){
+		$detect = new Mobile_Detect;
+		$deviceType = ($detect->isMobile() ? ($detect->isTablet() ? 'tablet' : 'phone') : 'computer');
+
+		if($session){
+		  @$_SESSION["dispositivo"] = $deviceType;
+		}
+		return($deviceType);
+	}
 }
 ?>

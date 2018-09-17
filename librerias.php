@@ -37,6 +37,8 @@ function jquery_validate(){
 function bootstrap_table(){
 	global $raiz;
 	$texto='<script src="' . $raiz . 'js/bootstrap-table.js"></script>';
+	$texto.='<script src="' . $raiz . 'js/locale/bootstrap-table-es-ES.js"></script>';
+	$texto.='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/bootstrap-table.css">';
 	return($texto);
 }
 ?>

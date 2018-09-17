@@ -11,7 +11,6 @@ echo(bootstrap_css());
 echo(jquery_js());
 echo(bootstrap_js());
 echo(notificacion());
-echo(login_css());
 ?>
 <html>
   <head>
