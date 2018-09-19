@@ -12,6 +12,7 @@ echo(jquery_js());
 echo(bootstrap_js());
 echo(notificacion());
 echo(bootstrap_table());
+echo(estilos_generales());
 ?>
 <html>
   <head>
@@ -19,18 +20,21 @@ echo(bootstrap_table());
   <body>
     <div class="container">
 		<div class="row justify-content-md-center">
-			<div class="col-sm-0">
-				<form class="text-center border border-light p-4" id="form_table" name="form_table">
+			<div class="col-sm-12">
+				<form class="text-center border p-4 formulario_general" id="form_table" name="form_table">
 					<p class="h4 mb-4">Usuarios registrados</p>
 					<table id="table">
 						<thead>
 							<tr>
-								<th data-field="id" data-sortable="false" data-visible="true">Id</th>
-								<th data-field="name" data-sortable="false" data-visible="true">Name</th>
-								<th data-field="price" data-sortable="false" data-visible="true">Price</th>
+								<th data-field="identificacion" data-sortable="true" data-visible="true">Identificacion</th>
+								<th data-field="nombres" data-sortable="true" data-visible="true">Nombres</th>
+								<th data-field="apellidos" data-sortable="true" data-visible="true">Apellidos</th>
+								<th data-field="email" data-sortable="true" data-visible="true">Email</th>
+								<th data-field="celular" data-sortable="true" data-visible="true">Celular</th>
 							</tr>
 						</thead>
 					</table>
+					<input type="hidden" id="cantidad_total">
 				</form>
 			</div>
 		</div>
@@ -38,32 +42,51 @@ echo(bootstrap_table());
   </body>
   <script>
 $body = $("body");
+
+var cantidad_registros = 10;
 $(document).ready(function(){
+	var alto_documento = $(document).height();
+	var alto_tabla = alto_documento-200;
+	
 	$('#table').bootstrapTable({
 		method: 'get',
 		cache: false,
 		pagination: true,
+		onlyInfoPagination: false,
 		showColumns: false,
 		showRefresh: false,
 		minimumCountColumns: 2,
 		clickToSelect: false,
 		sidePagination: 'server',
-		pageSize: 20,
-		search: false,
+		pageSize: cantidad_registros,
+		search: true,
 		cardView:false,
 		pageList:'All',
-		paginationVAlign:'both',
-		height: 400
+		paginationVAlign: 'bottom',
+		height: alto_tabla
 	});
 	
 	procesamiento_listar();
 });
+$(document).ready(function(){
+	$( window ).resize(function() {
+		var alto_documento = $(document).height();
+		var alto_tabla = alto_documento-200;
+		
+		$('#table').bootstrapTable( 'resetView' , {height: alto_tabla} );
+	});
+	
+	$("#form_table").submit(function(){
+		return false;
+	});
+});
+
 $(document).on({
     ajaxStart: function() { $body.addClass("loading");},
     ajaxStop: function() { $body.removeClass("loading");}
 });
 
-function procesamiento_listar(externo){
+function procesamiento_listar(){
 	var data = $('#form_table').serializeObject();
 	
 	$('#table').bootstrapTable('getOptions').sidePagination = 'client';
@@ -71,25 +94,30 @@ function procesamiento_listar(externo){
 	$('#table').bootstrapTable('getOptions').sidePagination = 'server';
 	
 	$('#table').bootstrapTable('refreshOptions', {
-		url: '<?php echo($raiz); ?>js/json_bootstrap-table.json',
+		//url: '<?php echo($raiz); ?>js/json_bootstrap-table.json',
+		url: 'obtener_usuarios.php',
 		queryParams: function (params) {
+			console.log(params);
 			var q = {
-			"rows": 20,
-			"numfilas":20,
-			"actual_row": params.offset,
-			"pagina":(params.offset/20)+1,
-			//"search": params.search,
-			//"sort": params.sort,
-			"order": params.order
-		};
-		$.extend( data, q);
-		if(externo){
-		  $.extend(data,{externo:1});
-		}
-		return data;
+				"rows": cantidad_registros,
+				"numfilas":cantidad_registros,
+				"actual_row": params.offset,
+				"pagina":(params.offset/cantidad_registros)+1,
+				"search": params.search,
+				"sort": params.sort,
+				"order": params.order
+			};
+			$.extend( data, q);
+			  
+			var cantidad_total = $("#cantidad_total").val();
+			if(cantidad_total){
+				$.extend(data,{total:cantidad_total});
+			}
+			
+			return data;
 		},
         onLoadSuccess: function(data){
-			
+			$("#cantidad_total").val(data.total);
 		}
 	});
 }

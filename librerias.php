@@ -1,4 +1,10 @@
 <?php
+function estilos_generales(){
+	global $raiz; 
+	$texto='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/gym.css">';
+	$texto.='<script src="' . $raiz . 'js/gym.js"></script>';
+	return($texto);
+}
 function bootstrap_css(){
 	global $raiz; 
 	$texto='<link rel="stylesheet" type="text/css" href="' . $raiz . 'vendor/twbs/bootstrap/dist/css/bootstrap.css">';

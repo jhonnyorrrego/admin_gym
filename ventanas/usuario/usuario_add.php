@@ -12,6 +12,7 @@ echo(jquery_js());
 echo(bootstrap_js());
 echo(notificacion());
 echo(jquery_validate());
+echo(estilos_generales());
 ?>
 <html>
   <head>
@@ -24,25 +25,113 @@ echo(jquery_validate());
 	$().ready(function() {
 		// validar los campos del formato
 		$('#usuario_add').validate();
+		
+		$("#guardar_usuario_formulario").click(function(){
+			var formulario = $("#usuario_add");
+			var resultado = formulario.valid();
+			
+			if(resultado){
+				var data = $(formulario).serializeArray(); // convert form to array
+				data.push({name: "ejecutar", value: 'guardar_usuario_formulario'});
+
+				$.ajax({
+					url : 'ejecutar_acciones.php',
+					type : 'POST',
+					dataType: 'json',
+					data: $.param(data),
+					success : function(resultado){
+						if(resultado.exito){
+							notificacion(resultado.mensaje,'success',5000);
+							
+							formulario[0].reset();
+						}else{
+							notificacion(resultado.mensaje,'warning',5000);
+						}
+					}
+				});
+			}
+		});
+		
+		$("#identificacion").blur(function(){
+			var x_identificacion = $("#identificacion").val();
+			if(identificacion){
+				$.ajax({
+					url : 'ejecutar_acciones.php',
+					type : 'POST',
+					dataType: 'json',
+					data: {ejecutar: 'validar_cedula', identificacion : x_identificacion},
+					success : function(resultado){
+						if(!resultado.exito){
+							//$("#identificacion").focus();
+							//$("#identificacion").select();
+							notificacion(resultado.mensaje,'warning',5000);
+						}
+					}
+				});
+			}
+		});
 	});
 	</script>
   </head>
   <body>
 	<div class="container">
 		<div class="row justify-content-md-center">
-			<div class="col-sm-8">
-				<form class="text-center border border-light p-4" name="usuario_add" id="usuario_add">
+			<div class="col-sm-10">
+				<form class="text-center border p-4 formulario_general" name="usuario_add" id="usuario_add">
 					<p class="h4 mb-4">Registro de Usuario</p>
-					<input type="text" id="nombre" name="nombre" class="form-control mb-4 required" placeholder="Nombres">
-					<input type="text" id="apellido" name="apellido" class="form-control mb-4 required" placeholder="Apellidos">
-					<input type="text" id="email" name="email" class="form-control mb-4 email" placeholder="Email">
-					<input type="text" id="celular" name="celular" class="form-control mb-4 number" placeholder="Celular">
-					<select class="form-control custom-select mb-4 required" id="tipo_usuario">
-						<option value="">Tipo de usuario</option>
-						<option value="1" selected>Cliente</option>
-						<option value="2">Administrador</option>
-					</select>
-					<button class="btn btn-info my-4 btn-block" type="submit">Registrar</button>
+					
+					<div class="form-group row">
+						<label for="example-text-input" class="col-3 col-form-label">Identificaci&oacute;n</label>
+						<div class="col-9">
+							<input type="text" id="identificacion" name="identificacion" class="form-control required number">
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="example-text-input" class="col-3 col-form-label">Nombres</label>
+						<div class="col-9">
+							<input type="text" id="nombre" name="nombres" class="form-control required">
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="example-text-input" class="col-3 col-form-label">Apellidos</label>
+						<div class="col-9">
+							<input type="text" id="apellido" name="apellidos" class="form-control required">
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="example-text-input" class="col-3 col-form-label">Email</label>
+						<div class="col-9">
+							<input type="text" id="email" name="email" class="form-control email">
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="example-text-input" class="col-3 col-form-label">Celular</label>
+						<div class="col-9">
+							<input type="text" id="celular" name="celular" class="form-control number">
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="example-text-input" class="col-3 col-form-label">Tipo de usuario</label>
+						<div class="col-9">
+							<select class="form-control custom-select required" id="tipo" name="tipo">
+								<option value="">Tipo de usuario</option>
+								<option value="1" selected>Cliente</option>
+								<option value="2">Administrador</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="example-text-input" class="col-3 col-form-label">Estado</label>
+						<div class="col-9">
+							<select class="form-control custom-select required" id="estado" name="estado">
+								<option value="">Estado</option>
+								<option value="1" selected>Activo</option>
+								<option value="2">Inactivo</option>
+							</select>
+						</div>
+					</div>
+					
+					<button id="guardar_usuario_formulario" class="btn btn-info my-4" type="button">Registrar</button>
 				</form>
 			</div>
 		</div>
