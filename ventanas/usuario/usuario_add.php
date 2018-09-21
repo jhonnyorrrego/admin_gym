@@ -81,19 +81,19 @@ echo(estilos_generales());
 					<p class="h4 mb-4">Registro de Usuario</p>
 					
 					<div class="form-group row">
-						<label for="example-text-input" class="col-3 col-form-label">Identificaci&oacute;n</label>
+						<label for="example-text-input" class="col-3 col-form-label">Identificaci&oacute;n*</label>
 						<div class="col-9">
 							<input type="text" id="identificacion" name="identificacion" class="form-control required number">
 						</div>
 					</div>
 					<div class="form-group row">
-						<label for="example-text-input" class="col-3 col-form-label">Nombres</label>
+						<label for="example-text-input" class="col-3 col-form-label">Nombres*</label>
 						<div class="col-9">
 							<input type="text" id="nombre" name="nombres" class="form-control required">
 						</div>
 					</div>
 					<div class="form-group row">
-						<label for="example-text-input" class="col-3 col-form-label">Apellidos</label>
+						<label for="example-text-input" class="col-3 col-form-label">Apellidos*</label>
 						<div class="col-9">
 							<input type="text" id="apellido" name="apellidos" class="form-control required">
 						</div>
@@ -111,7 +111,7 @@ echo(estilos_generales());
 						</div>
 					</div>
 					<div class="form-group row">
-						<label for="example-text-input" class="col-3 col-form-label">Tipo de usuario</label>
+						<label for="example-text-input" class="col-3 col-form-label">Tipo de usuario*</label>
 						<div class="col-9">
 							<select class="form-control custom-select required" id="tipo" name="tipo">
 								<option value="">Tipo de usuario</option>
@@ -121,7 +121,7 @@ echo(estilos_generales());
 						</div>
 					</div>
 					<div class="form-group row">
-						<label for="example-text-input" class="col-3 col-form-label">Estado</label>
+						<label for="example-text-input" class="col-3 col-form-label">Estado*</label>
 						<div class="col-9">
 							<select class="form-control custom-select required" id="estado" name="estado">
 								<option value="">Estado</option>

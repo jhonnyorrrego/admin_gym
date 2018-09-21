@@ -32,7 +32,10 @@ echo(estilos_iconos());
 								<th data-field="apellidos" data-sortable="true" data-visible="true">Apellidos</th>
 								<th data-field="email" data-sortable="true" data-visible="true">Email</th>
 								<th data-field="celular" data-sortable="true" data-visible="true">Celular</th>
+								<th data-field="tipo_usuario_funcion" data-sortable="false" data-visible="true">Tipo de usuario</th>
+								<th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
 								<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
+								
 							</tr>
 						</thead>
 					</table>
