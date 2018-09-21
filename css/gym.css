@@ -1,6 +1,19 @@
+/*
+Para dar un espacio al recuadro de los formularios
+*/
 .container{
 	padding-top : 15px;
 }
+/*
+Para dar sombras a los formularios
+*/
 form.formulario_general{
 	box-shadow: 5px 5px 5px #888888;
+}
+/*
+Para pintar el fondo y borde del paginador de bootstrap-table
+*/
+.page-item.active .page-link {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
 }

@@ -10,6 +10,7 @@ echo(bootstrap_css());
 echo(jquery_js());
 echo(bootstrap_js());
 echo(notificacion());
+echo(estilos_iconos());
 
 $movil = $conexion -> detectar_movil(1);
 ?>
@@ -26,13 +27,13 @@ $movil = $conexion -> detectar_movil(1);
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="#" id="inicio">Inicio <span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="#" id="inicio"> <i class="fas fa-home"></i> Inicio <span class="sr-only">(current)</span></a>
         </li>
 		<li class="nav-item">
-          <a class="nav-link" href="#" id="usuario_nuevo">Registrar usuario nuevo <span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="#" id="usuario_nuevo"> <i class="fas fa-user-plus"></i> Usuario nuevo <span class="sr-only">(current)</span></a>
         </li>
 		<li class="nav-item">
-          <a class="nav-link" href="#" id="reporte_usuario">Usuarios <span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="#" id="reporte_usuario"> <i class="fas fa-list-ul"></i> Usuarios <span class="sr-only">(current)</span></a>
         </li>
         <!--li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

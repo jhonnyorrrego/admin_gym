@@ -13,12 +13,13 @@ echo(bootstrap_js());
 echo(notificacion());
 echo(bootstrap_table());
 echo(estilos_generales());
+echo(estilos_iconos());
 ?>
 <html>
   <head>
   </head>
   <body>
-    <div class="container">
+    <div class="container col-sm-10">
 		<div class="row justify-content-md-center">
 			<div class="col-sm-12">
 				<form class="text-center border p-4 formulario_general" id="form_table" name="form_table">
@@ -31,6 +32,7 @@ echo(estilos_generales());
 								<th data-field="apellidos" data-sortable="true" data-visible="true">Apellidos</th>
 								<th data-field="email" data-sortable="true" data-visible="true">Email</th>
 								<th data-field="celular" data-sortable="true" data-visible="true">Celular</th>
+								<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
 							</tr>
 						</thead>
 					</table>
@@ -94,7 +96,6 @@ function procesamiento_listar(){
 	$('#table').bootstrapTable('getOptions').sidePagination = 'server';
 	
 	$('#table').bootstrapTable('refreshOptions', {
-		//url: '<?php echo($raiz); ?>js/json_bootstrap-table.json',
 		url: 'obtener_usuarios.php',
 		queryParams: function (params) {
 			console.log(params);

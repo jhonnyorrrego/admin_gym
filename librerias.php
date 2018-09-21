@@ -47,4 +47,9 @@ function bootstrap_table(){
 	$texto.='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/bootstrap-table.css">';
 	return($texto);
 }
+function estilos_iconos(){
+	global $raiz;
+	$texto='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/css/all.css">';
+	return($texto);
+}
 ?>
