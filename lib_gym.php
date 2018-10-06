@@ -1,7 +1,6 @@
 <?php
 @session_start();
 include_once("config.php");
-require_once 'vendor/mobiledetect/mobiledetectlib/Mobile_Detect.php';
 
 $conexion=new lib_gym();
 class lib_gym{
@@ -54,10 +53,19 @@ class lib_gym{
 		}
 		return($deviceType);
 	}
-	
+	/*
+	funcion pensada a futuro cuando se necesite realizar limite a las consultas sobre otros motores
+	La funcion retorna el SQL convertido para ejecutar los limites.
+	*/
 	private function listar_datos_limite($consulta,$inicio,$cantidad){
 		$consulta = $consulta . " LIMIT " . $inicio . "," . $cantidad;
 		return($consulta);
+	}
+	public function obtener_datos_usuario($idusu){
+		$consulta = "select * from usuario where identificacion=" . $idusu;
+		$datos = $this -> listar_datos($consulta);
+		
+		return($datos);
 	}
 }
 ?>

@@ -19,12 +19,12 @@ echo(estilos_iconos());
   <head>
   </head>
   <body>
-    <div class="container col-sm-10">
+    <div class="container col-sm-10 cargando">
 		<div class="row justify-content-md-center">
 			<div class="col-sm-12">
 				<form class="text-center border p-4 formulario_general" id="form_table" name="form_table">
 					<p class="h4 mb-4">Usuarios registrados</p>
-					<table id="table">
+					<table id="table" class="table-striped">
 						<thead>
 							<tr>
 								<th data-field="identificacion" data-sortable="true" data-visible="true">Identificacion</th>
@@ -35,7 +35,6 @@ echo(estilos_iconos());
 								<th data-field="tipo_usuario_funcion" data-sortable="false" data-visible="true">Tipo de usuario</th>
 								<th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
 								<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
-								
 							</tr>
 						</thead>
 					</table>
@@ -49,7 +48,7 @@ echo(estilos_iconos());
 $body = $("body");
 
 var cantidad_registros = 10;
-$(document).ready(function(){
+$(document).ready(function(){//Se inicializa la tabla con estilos, el alto del documento y se ejecuta la accion para listar datos sobre la tabla
 	var alto_documento = $(document).height();
 	var alto_tabla = alto_documento-200;
 	
@@ -73,7 +72,7 @@ $(document).ready(function(){
 	
 	procesamiento_listar();
 });
-$(document).ready(function(){
+$(document).ready(function(){//Se aplica el alto a la tabla para que se adapte al momento de cambiar el temaño de la ventana.
 	$( window ).resize(function() {
 		var alto_documento = $(document).height();
 		var alto_tabla = alto_documento-200;
@@ -87,8 +86,8 @@ $(document).ready(function(){
 });
 
 $(document).on({
-    ajaxStart: function() { $body.addClass("loading");},
-    ajaxStop: function() { $body.removeClass("loading");}
+    //ajaxStart: function() { $body.addClass("loading");},
+    //ajaxStop: function() { $body.removeClass("loading");}
 });
 
 function procesamiento_listar(){
@@ -148,3 +147,6 @@ $.fn.serializeObject = function(){
 };
   </script>
 </html>
+<?php
+include_once($atras."ventanas/usuario/librerias_reporte_usuarios_js.php");
+?>

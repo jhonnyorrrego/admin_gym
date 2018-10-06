@@ -52,4 +52,9 @@ function estilos_iconos(){
 	$texto='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/css/all.css">';
 	return($texto);
 }
+function estilo_cargando(){
+	global $raiz;
+	$texto='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/cargando.css">';
+	return($texto);
+}
 ?>
