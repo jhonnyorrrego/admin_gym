@@ -22,7 +22,7 @@ echo(estilos_iconos());
     <div class="container col-sm-10 cargando">
 		<div class="row justify-content-md-center card card-small">
 			<div class="card-header border-bottom">
-				<h6 class="m-0">Usuarios registrados</h6>
+				<h6 class="m-0"><b>Usuarios registrados</b></h6>
 			</div>
 			<div class="col-sm-12 card-body">
 				<form class="text-center p-4 formulario_general" id="form_table" name="form_table">

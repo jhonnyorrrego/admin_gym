@@ -74,7 +74,7 @@ $movil = $conexion -> detectar_movil(1);
     </div>
   </nav>
 <?php
-$pagina_defecto = 'ventanas/ingreso/ingreso.php';
+$pagina_defecto = 'ventanas/ingreso/login.php';
 ?>
   <div id="capa_iframe_cuerpo" style="" class="">
     <iframe id="iframe_cuerpo" name="iframe_cuerpo" style="width:100%;height:100%;" border="0px" frameborder="0" src="<?php echo($pagina_defecto); ?>"></iframe>

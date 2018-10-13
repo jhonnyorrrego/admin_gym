@@ -20,7 +20,7 @@ echo(estilos_generales());
     <div class="container">
 		<div class="card card-small">
 			<div class="card-header border-bottom">
-				<h6 class="m-0">Registro de Ingreso</h6>
+				<h6 class="m-0"><b>Registro de Ingreso</b></h6>
 			</div>
 			<div class="card-body">				
 				<form class="text-center p-4 formulario_general">
