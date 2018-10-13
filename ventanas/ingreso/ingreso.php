@@ -18,10 +18,12 @@ echo(estilos_generales());
   </head>
   <body>
     <div class="container">
-		<div class="row justify-content-md-center">
-			<div class="col-sm-6">				
-				<form class="text-center border p-4 formulario_general">
-					<p class="h4 mb-4">Registro de Ingreso</p>
+		<div class="card card-small">
+			<div class="card-header border-bottom">
+				<h6 class="m-0">Registro de Ingreso</h6>
+			</div>
+			<div class="card-body">				
+				<form class="text-center p-4 formulario_general">
 					<div class="form-group row">
 						<div class="col-12">
 							<input type="email" id="identificacion" class="form-control mb-4" placeholder="Identificaci&oacute;n">
@@ -33,7 +35,7 @@ echo(estilos_generales());
 						</div>
 					</div>
 					<!-- Sign up button -->
-					<button class="btn btn-info my-4" type="submit">Ingresar</button>
+					<button class="mb-2 btn btn-outline-success mr-2" type="submit">Ingresar</button>
 				</form>
 			</div>
 		</div>

@@ -16,6 +16,9 @@ if (!defined("DB")){
 if (!defined("MOTOR")){
 	define("MOTOR", "mysql");
 }
+if (!defined("ALMACENAMIENTO")){
+	define("ALMACENAMIENTO", "../archivos/");
+}
 
 ini_set("display_errors",true);
 ini_set("safe_mode",false);

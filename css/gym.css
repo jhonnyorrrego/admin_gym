@@ -8,12 +8,33 @@ Para dar un espacio al recuadro de los formularios
 Para dar sombras a los formularios
 */
 form.formulario_general{
-	box-shadow: 5px 5px 5px #888888;
+	
 }
 /*
 Para pintar el fondo y borde del paginador de bootstrap-table
 */
 .page-item.active .page-link {
-    background-color: #17a2b8;
-    border-color: #17a2b8;
+    background-color: white;
+    border-color: #28a745;
+	color: black
+}
+
+body{
+	background: #f5f6f8;
+}
+.card-header{
+    background-color: #fff;
+}
+.card-header:first-child {
+    border-radius: .625rem .625rem 0 0;
+}
+.card-small {
+    box-shadow: 0 2px 0 rgba(90,97,105,.11), 0 4px 8px rgba(90,97,105,.12), 0 10px 10px rgba(90,97,105,.06), 0 7px 70px rgba(90,97,105,.1);
+}
+.card{
+	border-radius: .625rem;
+	border: none;
+}
+.page-link {
+    color: black;
 }

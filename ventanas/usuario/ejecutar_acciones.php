@@ -65,6 +65,12 @@ function consultar_existencia($identificacion,$tipo_retorno=1){
 		return($existe);
 	}
 }
+function guardar_imagen(){
+	global $conexion;
+	echo("hola");
+	print_r($_FILES);
+	
+}
 
 if(@$_REQUEST["ejecutar"]){
 	$_REQUEST["ejecutar"]();

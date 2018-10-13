@@ -75,11 +75,12 @@ echo(estilos_generales());
   </head>
   <body>
 	<div class="container">
-		<div class="row justify-content-md-center">
-			<div class="col-sm-10">
-				<form class="text-center border p-4 formulario_general" name="usuario_add" id="usuario_add">
-					<p class="h4 mb-4">Registro de Usuario</p>
-					
+		<div class="card card-small">
+			<div class="card-header border-bottom">
+				<h6 class="m-0">Registro de Usuario</h6>
+			</div>
+			<div class="col-sm-12 card-body">
+				<form class="text-center p-4 formulario_general" name="usuario_add" id="usuario_add">					
 					<div class="form-group row">
 						<label for="example-text-input" class="col-3 col-form-label">Identificaci&oacute;n*</label>
 						<div class="col-9">
@@ -131,7 +132,7 @@ echo(estilos_generales());
 						</div>
 					</div>
 					
-					<button id="guardar_usuario_formulario" class="btn btn-info my-4" type="button">Registrar</button>
+					<button id="guardar_usuario_formulario" class="mb-2 btn btn-outline-success mr-2" type="button">Registrar</button>
 				</form>
 			</div>
 		</div>

@@ -26,27 +26,51 @@ $movil = $conexion -> detectar_movil(1);
   
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="#" id="inicio"> <i class="fas fa-home"></i> Inicio <span class="sr-only">(current)</span></a>
+		<?php
+		if(!@$_SESSION["usuario"]){
+		?>
+        <li class="nav-item active border-right">
+          <a class="nav-link enlaces" href="#" id="inicio"> <i class="fas fa-home"></i> Inicio <span class="sr-only">(current)</span></a>
         </li>
-		<li class="nav-item">
-          <a class="nav-link" href="#" id="usuario_nuevo"> <i class="fas fa-user-plus"></i> Usuario nuevo <span class="sr-only">(current)</span></a>
-        </li>
-		<li class="nav-item">
-          <a class="nav-link" href="#" id="reporte_usuario"> <i class="fas fa-list-ul"></i> Usuarios <span class="sr-only">(current)</span></a>
-        </li>
-        <!--li class="nav-item dropdown">
+		<?php
+		}
+		?>
+		<!--li class="nav-item border-right">
+          <a class="nav-link enlaces" href="#" id="usuario_nuevo"> <i class="fas fa-user-plus"></i> Usuario nuevo <span class="sr-only">(current)</span></a>
+        </li-->
+		<!--li class="nav-item border-right">
+          <a class="nav-link enlaces" href="#" id="reporte_usuario"> <i class="fas fa-list-ul"></i> Usuarios <span class="sr-only">(current)</span></a>
+        </li-->
+		
+		<?php
+		if(!@$_SESSION["usuario"]){
+		?>
+        <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Dropdown
+            <i class="fas fa-list-ul"></i> Usuarios <span class="sr-only">(current)</span>
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="#">Action</a>
-            <a class="dropdown-item" href="#">Another action</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Something else here</a>
+            <a class="dropdown-item enlaces" href="#" id="reporte_usuario">
+				<i class="fas fa-list-ul"></i> Lista de usuarios
+			</a>
+            <a class="dropdown-item enlaces" href="#" id="usuario_nuevo">
+				<i class="fas fa-user-plus"></i> Usuario nuevo
+			</a>
+            
+			<!--div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a-->
           </div>
-        </li-->
+        </li>
+		<?php
+		}
+		?>
       </ul>
+	  
+	  <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+		<li class="nav-item">
+			<img src="img/logo.png" alt="logo" style="width:150px;height:35px" class="img-fluid rounded">
+		</li>
+	  </ul>
     </div>
   </nav>
 <?php
@@ -67,8 +91,8 @@ $(document).ready(function(){
 	  $("#iframe_cuerpo").height(alto_documento-150);
   });
 });
-$(".nav-link").click(function(){
-  $(".nav-item").removeClass("active");
+$(".enlaces").click(function(){
+  $(".enlaces").removeClass("active");
   var boton=$(this).attr("id");
   
   if(boton == 'inicio'){          

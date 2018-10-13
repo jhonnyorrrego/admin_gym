@@ -22,6 +22,6 @@ $(document).ready(function(){
 $(document).on('click','.ver_usuario',function(){
 	var idusuario = $(this).attr("idusuario");
 	var src = "<?php echo($atras); ?>ventanas/usuario/ver_usuario.php?idusuario=" + idusuario;
-	$("#pantallas_usuarios").attr("src", src);
+	window.open(src,"_self");
 });
 </script>

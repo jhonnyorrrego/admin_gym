@@ -28,19 +28,56 @@ $estado[2] = "Inactivo";
   <head>
 	<script type='text/javascript'>
 	$().ready(function() {
+		$('#anexar_imagen').click(function(){
+			$("#imagen_usuario").click();
+		});
+		
+		$("#imagen_usuario").change(function(){
+			var formData = new FormData(document.getElementById("form_imagen_usuario"));
+			formData.append('ejecutar', 'guardar_imagen');
+			
+			$.ajax({
+				url : "ejecutar_acciones.php",
+				type : "POST",
+				dataType: "json",
+				async: false,
+				cache: false,
+				contentType: false,
+				processData: false,
+				data : formData,
+				success : function(respuesta){
+					
+				}
+			});
+		});
 	});
 	</script>
   </head>
   <body>
 	<div class="container">
-		<div class="row justify-content-md-center">
-			<div class="col-sm-12">
-				<p class="text-center h4 mb-4"><?php echo(ucwords(strtolower($datos_usuario[0]["nombres"] . " " . $datos_usuario[0]["apellidos"]))); ?></p>
-				<table class="table table-bordered">
+		<div class="card card-small">
+			<div class="card-header border-bottom">
+				<h6 class="m-0">Informaci&oacute;n de usuario</h6>
+			</div>
+			<div class="col-sm-12 card-body">
+				<table class="table table-bordered" style="font-size:13px">
 					<tr>
-						<td style="width:30%"><b>Identificaci&oacute;n</b></td>
-						<td style="width:40%"><?php echo($datos_usuario[0]["identificacion"]); ?></td>
-						<td style="width:30%" rowspan="5"><img src="<?php echo($atras); ?>img/sin_foto.png" class="img-fluid rounded"></td>
+						<td style="width:30%"><b>Nombres</b></td>
+						<td style="width:40%"><?php echo($datos_usuario[0]["nombres"]); ?></td>
+						<td style="width:30%" rowspan="7">
+							<img src="<?php echo($atras); ?>img/sin_foto.png" class="img-fluid rounded" id="anexar_imagen" style="cursor:pointer">
+							<form name="form_imagen_usuario" id="form_imagen_usuario" method="post" enctype="multipart/form-data">
+								<input type="file" name="imagen_usuario" id="imagen_usuario" style="display:none">
+							</form>
+						</td>
+					</tr>
+					<tr>
+						<td><b>Apellidos</b></td>
+						<td><?php echo($datos_usuario[0]["apellidos"]); ?></td>
+					</tr>
+					<tr>
+						<td><b>Identificaci&oacuten</b></td>
+						<td><?php echo($datos_usuario[0]["identificacion"]); ?></td>
 					</tr>
 					<tr>
 						<td><b>Email</b></td>

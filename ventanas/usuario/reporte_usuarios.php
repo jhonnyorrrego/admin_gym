@@ -20,10 +20,12 @@ echo(estilos_iconos());
   </head>
   <body>
     <div class="container col-sm-10 cargando">
-		<div class="row justify-content-md-center">
-			<div class="col-sm-12">
-				<form class="text-center border p-4 formulario_general" id="form_table" name="form_table">
-					<p class="h4 mb-4">Usuarios registrados</p>
+		<div class="row justify-content-md-center card card-small">
+			<div class="card-header border-bottom">
+				<h6 class="m-0">Usuarios registrados</h6>
+			</div>
+			<div class="col-sm-12 card-body">
+				<form class="text-center p-4 formulario_general" id="form_table" name="form_table">
 					<table id="table" class="table-striped">
 						<thead>
 							<tr>
