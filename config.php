@@ -19,6 +19,9 @@ if (!defined("MOTOR")){
 if (!defined("ALMACENAMIENTO")){
 	define("ALMACENAMIENTO", "../archivos/");
 }
+if (!defined("LLAVE_SESION")){
+	define("LLAVE_SESION", "ADMIN_GYM");
+}
 
 ini_set("display_errors",true);
 ini_set("safe_mode",false);

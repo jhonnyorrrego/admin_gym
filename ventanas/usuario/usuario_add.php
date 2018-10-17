@@ -52,6 +52,26 @@ echo(estilos_generales());
 			}
 		});
 		
+		$("#tipo").change(function(){
+			var tipo = $(this).val();
+			if(tipo == 2){//
+				$("#clave").addClass("required");
+				$("#clave").parent().parent().show(1000);
+				
+				$("#clave2").addClass("required");
+				$("#clave2").parent().parent().show(1000);
+			} else {
+				$("#clave").removeClass("required");
+				$("#clave").val("");
+				$("#clave").parent().parent().hide(1000);
+				
+				$("#clave2").removeClass("required");
+				$("#clave2").val("");
+				$("#clave2").parent().parent().hide(1000);
+				
+			}
+		});
+		
 		$("#identificacion").blur(function(){
 			var x_identificacion = $("#identificacion").val();
 			if(identificacion){
@@ -82,9 +102,31 @@ echo(estilos_generales());
 			<div class="col-sm-12 card-body">
 				<form class="text-center p-4 formulario_general" name="usuario_add" id="usuario_add">					
 					<div class="form-group row">
+						<label for="example-text-input" class="col-3 col-form-label">Tipo de usuario*</label>
+						<div class="col-9">
+							<select class="form-control custom-select required" id="tipo" name="tipo">
+								<option value="">Tipo de usuario</option>
+								<option value="1" selected>Cliente</option>
+								<option value="2">Administrador</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group row">
 						<label for="example-text-input" class="col-3 col-form-label">Identificaci&oacute;n*</label>
 						<div class="col-9">
 							<input type="text" id="identificacion" name="identificacion" class="form-control required number">
+						</div>
+					</div>
+					<div class="form-group row" style="display:none">
+						<label for="example-text-input" class="col-3 col-form-label">Clave*</label>
+						<div class="col-9">
+							<input type="password" id="clave" name="clave" class="form-control">
+						</div>
+					</div>
+					<div class="form-group row" style="display:none">
+						<label for="example-text-input" class="col-3 col-form-label">Repita su clave*</label>
+						<div class="col-9">
+							<input type="password" id="clave2" class="form-control" equalTo="#clave">
 						</div>
 					</div>
 					<div class="form-group row">
@@ -109,16 +151,6 @@ echo(estilos_generales());
 						<label for="example-text-input" class="col-3 col-form-label">Celular</label>
 						<div class="col-9">
 							<input type="text" id="celular" name="celular" class="form-control number">
-						</div>
-					</div>
-					<div class="form-group row">
-						<label for="example-text-input" class="col-3 col-form-label">Tipo de usuario*</label>
-						<div class="col-9">
-							<select class="form-control custom-select required" id="tipo" name="tipo">
-								<option value="">Tipo de usuario</option>
-								<option value="1" selected>Cliente</option>
-								<option value="2">Administrador</option>
-							</select>
 						</div>
 					</div>
 					<div class="form-group row">

@@ -6,7 +6,9 @@ global $conexion, $raiz;
 $raiz = $atras;
 
 function guardar_usuario_formulario(){
-	global $conexion;
+	global $conexion, $atras;
+	include_once($atras . "ventanas/librerias/librerias_encriptar.php");
+
 	$retorno = array();
 	
 	$existencia = consultar_existencia($_REQUEST["identificacion"],2);
@@ -20,8 +22,13 @@ function guardar_usuario_formulario(){
 	unset($_REQUEST["ejecutar"]);
 	
 	foreach($_REQUEST as $llave => $val){
-		$campos[] = $llave;
-		$valores[] = "'" . $val . "'";
+		if($llave == 'clave'){
+			$campos[] = $llave;
+			$valores[] = "'" . metodo_encriptar($val) . "'";
+		} else {
+			$campos[] = $llave;
+			$valores[] = "'" . $val . "'";
+		}
 	}
 	
 	$resultado = $conexion -> insertar('usuario',$campos,$valores);

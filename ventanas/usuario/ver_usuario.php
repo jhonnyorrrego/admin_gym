@@ -62,8 +62,8 @@ $estado[2] = "Inactivo";
 			<div class="col-sm-12 card-body">
 				<table class="table table-bordered" style="font-size:13px">
 					<tr>
-						<td style="width:30%"><b>Nombres</b></td>
-						<td style="width:40%"><?php echo($datos_usuario[0]["nombres"]); ?></td>
+						<td style="width:20%"><b>Nombres</b></td>
+						<td style="width:50%" class="" style="cursor:pointer;"><?php echo($datos_usuario[0]["nombres"]); ?></td>
 						<td style="width:30%" rowspan="7">
 							<img src="<?php echo($atras); ?>img/sin_foto.png" class="img-fluid rounded" id="anexar_imagen" style="cursor:pointer">
 							<form name="form_imagen_usuario" id="form_imagen_usuario" method="post" enctype="multipart/form-data">

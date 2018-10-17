@@ -27,10 +27,10 @@ $movil = $conexion -> detectar_movil(1);
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
 		<?php
-		if(!@$_SESSION["usuario"]){
+		if(@$_SESSION["usuario" . LLAVE_SESION]){
 		?>
         <li class="nav-item active border-right">
-          <a class="nav-link enlaces" href="#" id="inicio"> <i class="fas fa-home"></i> Inicio <span class="sr-only">(current)</span></a>
+          <a class="nav-link enlaces" href="#" id="inicio"> <i class="fas fa-home"></i> Inicio </a>
         </li>
 		<?php
 		}
@@ -43,9 +43,9 @@ $movil = $conexion -> detectar_movil(1);
         </li-->
 		
 		<?php
-		if(!@$_SESSION["usuario"]){
+		if(@$_SESSION["usuario" . LLAVE_SESION]){
 		?>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown border-right">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-list-ul"></i> Usuarios <span class="sr-only">(current)</span>
           </a>
@@ -61,6 +61,9 @@ $movil = $conexion -> detectar_movil(1);
             <a class="dropdown-item" href="#">Something else here</a-->
           </div>
         </li>
+		    <li class="nav-item active">
+          <a class="nav-link enlaces" href="#" id="logout"> <i class="fas fa-power-off"></i> Cerrar sesi&oacute;n </a>
+        </li>
 		<?php
 		}
 		?>
@@ -75,6 +78,9 @@ $movil = $conexion -> detectar_movil(1);
   </nav>
 <?php
 $pagina_defecto = 'ventanas/ingreso/login.php';
+if(@$_SESSION["usuario" . LLAVE_SESION]){
+  $pagina_defecto = 'ventanas/ingreso/ingreso.php';
+}
 ?>
   <div id="capa_iframe_cuerpo" style="" class="">
     <iframe id="iframe_cuerpo" name="iframe_cuerpo" style="width:100%;height:100%;" border="0px" frameborder="0" src="<?php echo($pagina_defecto); ?>"></iframe>
@@ -103,6 +109,9 @@ $(".enlaces").click(function(){
   }
   if(boton == 'reporte_usuario'){          
     $("#iframe_cuerpo").attr("src","ventanas/usuario/reporte_usuarios.php");
+  }
+  if(boton == 'logout'){          
+    $("#iframe_cuerpo").attr("src","ventanas/ingreso/salir.php");
   }
 });
 </script>

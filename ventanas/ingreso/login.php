@@ -17,6 +17,42 @@ echo(login_css());
 ?>
 <html>
 	<head>
+		<script>
+$(document).ready(function(){
+	$("#ingresar").click(function(){
+		var x_identificacion = $("#identificacion").val();
+		var x_clave = $("#clave").val();
+
+		if(!x_identificacion || !x_clave){
+			notificacion('Llene los campos','warning',4000);
+			return false;
+		}
+
+		$.ajax({
+			url: 'ejecutar_acciones.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {ejecutar: 'validar_ingreso', identificacion : x_identificacion, clave : x_clave},
+			success : function(html){
+				if(html.exito){
+					notificacion(html.mensaje,'success',1500);
+
+					setTimeout(function(){window.parent.open("<?php echo($atras); ?>index.php", "_self");},1500); 
+				} else {
+					notificacion(html.mensaje,'warning',4000);
+				}
+			}
+		});		
+	});
+
+	$(document).keypress(function(event) {
+	    var keycode = (event.keyCode ? event.keyCode : event.which);
+	    if(keycode == '13') {
+	      $("#ingresar").click();
+	    }
+	});
+});
+		</script>
 	</head>
 	<body>
 		<div class="container">
@@ -29,17 +65,17 @@ echo(login_css());
 						<form class="login-form">
 						  <div class="form-group">
 							<label for="exampleInputEmail1" class="">Usuario</label>
-							<input type="text" class="form-control" placeholder="">
+							<input type="text" class="form-control" id="identificacion" name="identificacion" placeholder="Identificacion">
 							
 						  </div>
 						  <div class="form-group">
 							<label for="exampleInputPassword1" class="">Contrase&ntilde;a</label>
-							<input type="password" class="form-control" placeholder="">
+							<input type="password" class="form-control" id="clave" name="clave" placeholder="Contraseña">
 						  </div>
 						  
 						  
 							<div class="form-check">
-								<button type="submit" class="mb-2 btn btn-outline-success mr-2 float-right">Submit</button>
+								<button type="button" id="ingresar" class="mb-2 btn btn-outline-success mr-2 float-right">Ingresar</button>
 							  </div>
 						  
 						</form>

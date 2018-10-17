@@ -67,5 +67,13 @@ class lib_gym{
 		
 		return($datos);
 	}
+	public function iniciar_variables_sesiones($datos){
+		$_SESSION["usuario" . LLAVE_SESION] = $datos[0]["identificacion"];
+		$_SESSION["tipo" . LLAVE_SESION] = $datos[0]["tipo"];
+	}
+	public function cerrar_sesion(){
+		@session_unset();
+		@session_destroy();
+	}
 }
 ?>
