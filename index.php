@@ -13,52 +13,46 @@ echo(notificacion());
 echo(estilos_iconos());
 
 $movil = $conexion -> detectar_movil(1);
+
+$clase_menu = "border-right";
+if (@$_SESSION["dispositivo"] == 'phone') {
+  $clase_menu = "";
+}
 ?>
 <html>
   <head>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light border">
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <?php if (@$_SESSION["usuario" . LLAVE_SESION]){ ?>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+    <?php } ?>
   
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
 		<?php
 		if(@$_SESSION["usuario" . LLAVE_SESION]){
 		?>
-        <li class="nav-item active border-right">
-          <a class="nav-link enlaces" href="#" id="inicio"> <i class="fas fa-home"></i> Inicio </a>
+        <li class="nav-item active <?php echo($clase_menu); ?>">
+          <a class="nav-link enlaces" href="#" id="inicio"> <i class="fas fa-home"></i> Ingreso </a>
         </li>
-		<?php
-		}
-		?>
-		<!--li class="nav-item border-right">
-          <a class="nav-link enlaces" href="#" id="usuario_nuevo"> <i class="fas fa-user-plus"></i> Usuario nuevo <span class="sr-only">(current)</span></a>
-        </li-->
-		<!--li class="nav-item border-right">
-          <a class="nav-link enlaces" href="#" id="reporte_usuario"> <i class="fas fa-list-ul"></i> Usuarios <span class="sr-only">(current)</span></a>
-        </li-->
-		
-		<?php
-		if(@$_SESSION["usuario" . LLAVE_SESION]){
-		?>
-        <li class="nav-item dropdown border-right">
+        <li class="nav-item dropdown <?php echo($clase_menu); ?>">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-list-ul"></i> Usuarios <span class="sr-only">(current)</span>
+            <i class="fas fa-users"></i> Usuarios
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <a class="dropdown-item enlaces" href="#" id="reporte_usuario">
-				<i class="fas fa-list-ul"></i> Lista de usuarios
-			</a>
+				      <i class="fas fa-list-ul"></i> Lista de usuarios
+			       </a>
             <a class="dropdown-item enlaces" href="#" id="usuario_nuevo">
-				<i class="fas fa-user-plus"></i> Usuario nuevo
-			</a>
+				      <i class="fas fa-user-plus"></i> Usuario nuevo
+			       </a>
             
-			<!--div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Something else here</a-->
+			       <!--div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#">Something else here</a-->
           </div>
         </li>
 		    <li class="nav-item active">
@@ -88,14 +82,16 @@ if(@$_SESSION["usuario" . LLAVE_SESION]){
 </body>
 </html>
 <script>
+$(window).on('resize', function() {
+  setTimeout(function() {
+    var alto_documento=$(document).height();
+    //$("#iframe_cuerpo").height(alto_documento-120);
+  }, 250);
+});
+
 $(document).ready(function(){
-  var alto_documento=$(document).height();
-  $("#iframe_cuerpo").height(alto_documento-150);
-  
-  $( window ).resize(function() {
-	  var alto_documento=$(document).height();
-	  $("#iframe_cuerpo").height(alto_documento-150);
-  });
+  var alto_documento = $(document).height();
+  $("#iframe_cuerpo").height(alto_documento-120);
 });
 $(".enlaces").click(function(){
   $(".enlaces").removeClass("active");

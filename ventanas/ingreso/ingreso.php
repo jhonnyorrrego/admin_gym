@@ -15,6 +15,11 @@ echo(estilos_generales());
 ?>
 <html>
   <head>
+  	<script type="text/javascript">
+ $(document).ready(function() {
+ 	
+ });
+  	</script>
   </head>
   <body>
     <div class="container">

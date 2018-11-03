@@ -30,6 +30,8 @@ function guardar_usuario_formulario(){
 			$valores[] = "'" . $val . "'";
 		}
 	}
+	$campos[] = "fecha";
+	$valores[] = "date_format('" . date('Y-m-d H:i:s') . "', '%Y-%m-%d %H:%i:%s')";
 	
 	$resultado = $conexion -> insertar('usuario',$campos,$valores);
 	if($resultado){
@@ -73,10 +75,92 @@ function consultar_existencia($identificacion,$tipo_retorno=1){
 	}
 }
 function guardar_imagen(){
+	global $conexion, $atras;
+	$retorno = array();
+
+	$idusu = @$_REQUEST["idusu"];
+	$idanexos = $conexion -> procesar_anexos($idusu, $atras);
+
+	$tabla = 'usuario';
+	$valor_guardar[] = "imagen='" . $idanexos . "'";
+	$condicion = "idusu=" . $idusu;
+
+	$conexion -> modificar($tabla,$valor_guardar,$condicion,$idusu);
+
+	if($idanexos){
+		$imagen = $atras . ALMACENAMIENTO .  $conexion -> obtener_imagen_usuario($idusu);
+
+		$retorno["exito"] = 1;
+		$retorno["mensaje"] = 'Imagen guardada';
+		$retorno["imagen"] = $imagen;
+	} else {
+		$retorno["exito"] = 0;
+		$retorno["mensaje"] = 'Problemas al guardar la imagen';
+	}
+
+	echo json_encode($retorno);
+}
+function modificar_unico_usuario(){
 	global $conexion;
-	echo("hola");
-	print_r($_FILES);
-	
+	$retorno = array();
+
+	$nombre = @$_REQUEST["nombre"];
+	$valor = @$_REQUEST["valor"];
+	$id = @$_REQUEST["id"];
+	$tabla = 'usuario';
+	$condicion_update = "idusu=" . $id;
+	$tipo = @$_REQUEST["tipo"];
+
+	if($tipo == 'texto'){
+		$valor = "'" . $valor . "'";
+	}
+
+	$valor_guardar = array();
+	$valor_guardar[] = $nombre . "=" . $valor;
+
+	$conexion -> modificar($tabla,$valor_guardar,$condicion_update,$id);
+
+	$retorno["exito"] = 1;
+	$retorno["mensaje"] = 'Modificacion realizada';
+
+	echo json_encode($retorno);
+}
+function agregar_mensualidad(){
+	global $conexion;
+	$retorno = array();
+
+	$fechai = @$_REQUEST["fechai"];
+	$fechaf = @$_REQUEST["fechaf"];
+	$id = @$_REQUEST["id"];
+	$tabla = 'mensualidad';
+	$condicion_update = "idusu=" . $id;
+
+	//Parseando arreglo para insertar
+	$campos_insertar = array('fechai','fechaf','idusu','estado');
+	$valores_insertar = array();
+	$valores_insertar[] = "date_format('" . $fechai . "', '%Y-%m-%d')";
+	$valores_insertar[] = "date_format('" . $fechaf . "', '%Y-%m-%d')";
+	$valores_insertar[] = $id;
+	$valores_insertar[] = 1;
+
+	$resultado = $conexion -> insertar($tabla,$campos_insertar,$valores_insertar);
+
+	//Parseando arreglo para modificar en la tabla del usuario
+	$valor_guardar = array();
+	$valor_guardar[] = "fechai=date_format('" . $fechai . "', '%Y-%m-%d')";
+	$valor_guardar[] = "fechaf=date_format('" . $fechaf . "', '%Y-%m-%d')";
+
+	$conexion -> modificar('usuario',$valor_guardar,$condicion_update,$id);
+
+	if($resultado){
+		$retorno["mensaje"] = "Mensualidad asignada!";
+		$retorno["exito"] = 1;
+		$retorno["html"] = $conexion -> obtener_texto_mensualidad($id);
+	}else{
+		$retorno["exito"] = 0;
+		$retorno["mensaje"] = "Problemas en la inserci&oacute;n";
+	}
+	echo(json_encode($retorno));
 }
 
 if(@$_REQUEST["ejecutar"]){

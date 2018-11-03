@@ -14,6 +14,11 @@ echo(notificacion());
 echo(bootstrap_table());
 echo(estilos_generales());
 echo(estilos_iconos());
+
+$alto_tabla = "alto_documento-200";
+if (@$_SESSION["dispositivo"] == 'phone') {
+	$alto_tabla = "alto_documento+850";
+}
 ?>
 <html>
   <head>
@@ -25,7 +30,7 @@ echo(estilos_iconos());
 				<h6 class="m-0"><b>Usuarios registrados</b></h6>
 			</div>
 			<div class="col-sm-12 card-body">
-				<form class="text-center p-4 formulario_general" id="form_table" name="form_table">
+				<form class="text-center formulario_general" id="form_table" name="form_table">
 					<table id="table" class="table-striped">
 						<thead>
 							<tr>
@@ -52,7 +57,7 @@ $body = $("body");
 var cantidad_registros = 10;
 $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del documento y se ejecuta la accion para listar datos sobre la tabla
 	var alto_documento = $(document).height();
-	var alto_tabla = alto_documento-200;
+	var alto_tabla = <?php echo($alto_tabla); ?>;
 	
 	$('#table').bootstrapTable({
 		method: 'get',
@@ -69,6 +74,7 @@ $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del d
 		cardView:false,
 		pageList:'All',
 		paginationVAlign: 'bottom',
+		responsive: true,
 		height: alto_tabla
 	});
 	
@@ -77,9 +83,7 @@ $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del d
 $(document).ready(function(){//Se aplica el alto a la tabla para que se adapte al momento de cambiar el temaño de la ventana.
 	$( window ).resize(function() {
 		var alto_documento = $(document).height();
-		var alto_tabla = alto_documento-200;
-		
-		$('#table').bootstrapTable( 'resetView' , {height: alto_tabla} );
+		var alto_tabla = <?php echo($alto_tabla); ?>;
 	});
 	
 	$("#form_table").submit(function(){
@@ -150,5 +154,5 @@ $.fn.serializeObject = function(){
   </script>
 </html>
 <?php
-include_once($atras."ventanas/usuario/librerias_reporte_usuarios_js.php");
+include_once($atras . "ventanas/usuario/librerias_reporte_usuarios_js.php");
 ?>

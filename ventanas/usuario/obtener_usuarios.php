@@ -31,7 +31,7 @@ if($campo_ordenar){
 	$order .= "order by " . $campo_ordenar . " " . $asc_desc;
 }
 
-$sql = "select identificacion, nombres, apellidos, email, celular, tipo, estado from usuario where 1=1 " . implode("",$where_contenedor) . " " . $order;
+$sql = "select idusu, identificacion, nombres, apellidos, email, celular, tipo, estado from usuario where 1=1 " . implode("",$where_contenedor) . " " . $order;
 $datos = $conexion -> listar_datos($sql,$inicio,$cantidad);
 
 $arreglo = array();
@@ -45,7 +45,7 @@ $arreglo["total"] = $datos_cantidad[0]["cantidad"];
 //----------------
 
 for($i=0;$i<$datos["cant_resultados"];$i++){
-	$datos[$i]["acciones_usuario"]=(acciones_usuario($datos[$i]["identificacion"]));
+	$datos[$i]["acciones_usuario"]=(acciones_usuario($datos[$i]["idusu"]));
 	$datos[$i]["tipo_usuario_funcion"]=(tipo_usuario_funcion($datos[$i]["tipo"]));
 	$datos[$i]["estado_funcion"]=(estado_funcion($datos[$i]["estado"]));
 }

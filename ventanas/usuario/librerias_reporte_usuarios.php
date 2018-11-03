@@ -17,11 +17,9 @@ function estado_funcion($estado){
 	}
 	return($cadena);
 }
-function acciones_usuario($identificacion){
+function acciones_usuario($idusu){
 	global $conexion, $raiz;
-	$cadena = "<button class='btn btn-light ver_usuario' idusuario='" . $identificacion . "' id='usuario_" . $identificacion . "'><i class='fas fa-address-card'></i></button>";
-	$cadena .= "<button class='btn btn-light' idusuario='" . $identificacion . "' id='usuario_" . $identificacion . "'><i class='fas fa-user-edit'></i></button>";
-	$cadena .= "<button class='btn btn-light' idusuario='" . $identificacion . "' id='usuario_" . $identificacion . "'><i class='fas fa-user-minus'></i></button>";
+	$cadena = "<button class='btn btn-light ver_usuario' idusuario='" . $idusu . "' id='usuario_" . $idusu . "'><i class='fas fa-address-card'></i></button>";
 	return($cadena);
 }
 

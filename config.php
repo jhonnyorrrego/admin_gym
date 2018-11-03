@@ -19,6 +19,12 @@ if (!defined("MOTOR")){
 if (!defined("ALMACENAMIENTO")){
 	define("ALMACENAMIENTO", "../archivos/");
 }
+if (!defined("PERMISO_CARPETA")){
+	define("PERMISO_CARPETA", 0777);
+}
+if (!defined("PERMISO_ARCHIVO")){
+	define("PERMISO_ARCHIVO", 0777);
+}
 if (!defined("LLAVE_SESION")){
 	define("LLAVE_SESION", "ADMIN_GYM");
 }

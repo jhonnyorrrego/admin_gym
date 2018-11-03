@@ -47,6 +47,13 @@ function bootstrap_table(){
 	$texto.='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/bootstrap-table.css">';
 	return($texto);
 }
+function bootstrap_datepicker(){
+	global $raiz;
+	$texto='<script src="' . $raiz . 'js/datepicker/bootstrap-datepicker.js"></script>';
+	$texto.='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/datepicker/bootstrap-datepicker.css">';
+	$texto.='<script src="' . $raiz . 'js/datepicker/locales/bootstrap-datepicker.es.js"></script>';
+	return($texto);
+}
 function estilos_iconos(){
 	global $raiz;
 	$texto='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/css/all.css">';
@@ -55,6 +62,11 @@ function estilos_iconos(){
 function estilo_cargando(){
 	global $raiz;
 	$texto='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/cargando.css">';
+	return($texto);
+}
+function date_format_jquery(){
+	global $raiz;
+	$texto='<script src="' . $raiz . 'js/jquery-dateformat.js"></script>';
 	return($texto);
 }
 ?>
