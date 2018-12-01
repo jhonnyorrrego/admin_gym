@@ -37,24 +37,61 @@ function guardar_usuario_formulario(){
 	if($resultado){
 		$retorno["mensaje"] = "Usuario registrado!";
 		$retorno["exito"] = 1;
+		$retorno["idusu"] = $resultado;
 	}else{
 		$retorno["exito"] = 0;
 		$retorno["mensaje"] = "Problemas en la inserci&oacute;n";
 	}
 	echo(json_encode($retorno));
 }
+function actualizar_usuario_formulario(){
+	global $conexion, $atras;
+	$idusu = @$_REQUEST["idusu"];
+	$tabla = "usuario";
+
+	$retorno = array();
+	$valor_guardar = array();
+
+	$campos_validos = array('tipo','identificacion','nombres','apellidos','email','celular','estado');
+	foreach ($campos_validos as $key => $value) {
+		if(array_key_exists($value, $_REQUEST)){
+			$valor_guardar[] = " " . $value . "='" . @$_REQUEST[$value] . "' ";
+		}
+	}
+	if(@$_REQUEST["clave"]){
+		$valor_guardar[] = " clave='" . metodo_encriptar($_REQUEST["clave"]) . "' ";
+	}
+
+	$condicion_update = "idusu=" . $idusu;
+
+	$conexion -> modificar($tabla,$valor_guardar,$condicion_update,$idusu);
+
+	$retorno["info_estado"] = $conexion -> obtener_texto_estado_usuario($idusu);
+	$retorno["exito"] = 1;
+	$retorno["mensaje"] = 'Modificacion realizada';
+
+	echo json_encode($retorno);
+}
 function validar_cedula(){
 	global $conexion;
+	$where = "";
 	$identificacion = @$_REQUEST["identificacion"];
-	$resultado = consultar_existencia($identificacion);
+	if(@$_REQUEST["idusu"]){
+		$idusu = $_REQUEST["idusu"];
+		$where = "idusu<>" . $idusu;
+	}
+	$resultado = consultar_existencia($identificacion,1,$where);
 	
 	echo(json_encode($resultado));
 }
-function consultar_existencia($identificacion,$tipo_retorno=1){
+function consultar_existencia($identificacion,$tipo_retorno=1,$where=false){
 	global $conexion;
 	$existe = False;
 	
 	$sql = "select identificacion from usuario where identificacion=" . $identificacion;
+	if($where){
+		$sql .= " and " . $where;
+	}
 	$datos = $conexion -> listar_datos($sql);
 	if($datos["cant_resultados"]){
 		$existe = True;
@@ -100,46 +137,23 @@ function guardar_imagen(){
 
 	echo json_encode($retorno);
 }
-function modificar_unico_usuario(){
-	global $conexion;
-	$retorno = array();
-
-	$nombre = @$_REQUEST["nombre"];
-	$valor = @$_REQUEST["valor"];
-	$id = @$_REQUEST["id"];
-	$tabla = 'usuario';
-	$condicion_update = "idusu=" . $id;
-	$tipo = @$_REQUEST["tipo"];
-
-	if($tipo == 'texto'){
-		$valor = "'" . $valor . "'";
-	}
-
-	$valor_guardar = array();
-	$valor_guardar[] = $nombre . "=" . $valor;
-
-	$conexion -> modificar($tabla,$valor_guardar,$condicion_update,$id);
-
-	$retorno["exito"] = 1;
-	$retorno["mensaje"] = 'Modificacion realizada';
-
-	echo json_encode($retorno);
-}
 function agregar_mensualidad(){
 	global $conexion;
 	$retorno = array();
 
 	$fechai = @$_REQUEST["fechai"];
 	$fechaf = @$_REQUEST["fechaf"];
+	$valor = @$_REQUEST["valor"];
 	$id = @$_REQUEST["id"];
 	$tabla = 'mensualidad';
 	$condicion_update = "idusu=" . $id;
 
 	//Parseando arreglo para insertar
-	$campos_insertar = array('fechai','fechaf','idusu','estado');
+	$campos_insertar = array('fechai','fechaf','valor','idusu','estado');
 	$valores_insertar = array();
 	$valores_insertar[] = "date_format('" . $fechai . "', '%Y-%m-%d')";
 	$valores_insertar[] = "date_format('" . $fechaf . "', '%Y-%m-%d')";
+	$valores_insertar[] = "'" . $valor . "'";
 	$valores_insertar[] = $id;
 	$valores_insertar[] = 1;
 
@@ -149,13 +163,16 @@ function agregar_mensualidad(){
 	$valor_guardar = array();
 	$valor_guardar[] = "fechai=date_format('" . $fechai . "', '%Y-%m-%d')";
 	$valor_guardar[] = "fechaf=date_format('" . $fechaf . "', '%Y-%m-%d')";
+	$valor_guardar[] = "valor='" . $valor . "'";
 
 	$conexion -> modificar('usuario',$valor_guardar,$condicion_update,$id);
 
 	if($resultado){
 		$retorno["mensaje"] = "Mensualidad asignada!";
 		$retorno["exito"] = 1;
-		$retorno["html"] = $conexion -> obtener_texto_mensualidad($id);
+		$retorno["info_mensualidad"] = $conexion -> obtener_texto_mensualidad($id);
+		$retorno["info_estado"] = $conexion -> obtener_texto_estado_usuario($id);
+		$retorno["info_valor"] = $conexion -> obtener_texto_valor($id);
 	}else{
 		$retorno["exito"] = 0;
 		$retorno["mensaje"] = "Problemas en la inserci&oacute;n";

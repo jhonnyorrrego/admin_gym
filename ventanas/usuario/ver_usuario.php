@@ -6,15 +6,11 @@ global $conexion, $raiz;
 $raiz = $atras;
 
 include_once ($atras . 'librerias.php');
-
-echo(bootstrap_css());
-echo(jquery_js());
-echo(bootstrap_js());
+echo(tema_dashboard_lite());
 echo(notificacion());
 echo(jquery_validate());
+
 echo(bootstrap_datepicker());
-echo(estilos_generales());
-echo(estilos_iconos());
 echo(date_format_jquery());
 
 $idusuario = @$_REQUEST["idusuario"];
@@ -23,27 +19,12 @@ $datos_usuario = $conexion -> obtener_datos_usuario($idusuario);
 
 $defecto = $atras . "img/sin_foto.png";
 $imagen_usuario = $conexion -> obtener_imagen_usuario($idusuario);
-if(@$imagen_usuario){
-	$defecto = $atras . ALMACENAMIENTO . $imagen_usuario;
+if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
+	$defecto = $atras . $imagen_usuario;
 }
-
-$tipo = array();
-$tipo[1] = "Cliente";
-$tipo[2] = "Administrador";
-$tipo_html = '<option value="">Tipo de usuario</option>';
-$tipo_html .= '<option value="1">Cliente</option>';
-$tipo_html .= '<option value="2">Administrador</option>';
-
-$estado = array();
-$estado[1] = "Activo";
-$estado[2] = "Inactivo";
-$estado_html = '<option value="">Estado</option>';
-$estado_html .= '<option value="1">Activo</option>';
-$estado_html .= '<option value="2">Inactivo</option>';
 ?>
-<html>
-  <head>
-  	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<?php echo(encabezado());?>
+
   	<style type="text/css">
   	.campo_editar{
   		cursor: pointer;
@@ -55,15 +36,15 @@ $estado_html .= '<option value="2">Inactivo</option>';
 	<script type='text/javascript'>
 	$().ready(function() {
 		$('html, body').animate({scrollTop:0}, 'slow');
-
 		$('#usuario_view').validate();
+		$('#mensualidad').validate();
 
 		$('#anexar_imagen').click(function(){
 			$("#imagen_usuario").click();
 		});
 		
 		$("#imagen_usuario").change(function(){
-			var formData = new FormData(document.getElementById("usuario_view"));
+			var formData = new FormData(document.getElementById("usuario_view_image"));
 			formData.append('idusu', '<?php echo($idusuario); ?>');
 			formData.append('ejecutar', 'guardar_imagen');
 			
@@ -87,101 +68,60 @@ $estado_html .= '<option value="2">Inactivo</option>';
 			});
 		});
 
-		$(document).on('click' , '.campo_editar' , function() {
-			var nombre = $(this).attr('nombre');
-			var tipo = $(this).attr('tipo');
-			var validacion = $(this).attr('validacion');
+		$(document).on('click' , '#actualizar_usuario_formulario' , function() {
+			var formulario = $("#usuario_view");
+			var resultado = formulario.valid();
 
-			if(tipo == 'texto'){
-				var html_dato = $(this).html();
-				var html_nuevo = '<input class="form-control campo_guardar ' + validacion + '" type="text" id="' + nombre + '" value="' + html_dato + '" tipo="' + tipo + '">';
+			if(resultado){
+				var data = $(formulario).serializeArray(); // convert form to array
+				data.push({name: "ejecutar", value: 'actualizar_usuario_formulario'});
+				data.push({name: "idusu", value: '<?php echo($idusuario); ?>'});
 
-				$(this).html(html_nuevo);
-				$(this).removeClass('campo_editar');
-
-				var fieldInput = $('#' + nombre);
-				var fldLength= fieldInput.val().length;
-				fieldInput.focus();
-				fieldInput[0].setSelectionRange(fldLength, fldLength);
-			} else if(tipo == 'lista_desplegable'){
-				var html_dato = $(this).attr("valor");
-				if(nombre == 'tipo'){
-					var html_nuevo = '<select class="form-control custom-select campo_guardar ' + validacion + '" type="text" id="' + nombre + '" tipo="' + tipo + '"><?php echo($tipo_html); ?></select>';
-
-				} else if(nombre == 'estado'){
-					var html_nuevo = '<select class="form-control custom-select campo_guardar ' + validacion + '" type="text" id="' + nombre + '"  tipo="' + tipo + '"><?php echo($estado_html); ?></select>';
-				}
-
-				$(this).html(html_nuevo);
-				$(this).removeClass('campo_editar');
-
-
-				$("#" + nombre + " option[value="+ html_dato +"]").attr("selected",true);
-				$("#" + nombre).focus();
+				$.ajax({
+					url: 'ejecutar_acciones.php',
+					type: 'POST',
+					dataType: 'json',
+					async: false,
+					data: $.param(data),
+					success : function(respuesta){
+						if(respuesta.exito){
+							notificacion(respuesta.mensaje,'success',4000);
+							$("#info_estado").html(respuesta.info_estado);
+						} else {
+							notificacion(respuesta.mensaje,'warning',4000);
+						}
+					}
+				});
 			}
-
 		});
 
-		$(document).on('blur' , '.campo_guardar' , function() {
-			var resultado_formulario = $('#usuario_view').valid();
-			if(!resultado_formulario){
-				return false;
-			}
-
-			var elemento_td = $(this).parent();
-			var tipo = $(this).attr('tipo');
-
-			if(tipo == 'texto'){
-				var x_nombre = $(this).attr('id');
-				var x_valor = $(this).val();
-
+		$("#identificacion").blur(function(){
+			var x_identificacion = $("#identificacion").val();
+			if(identificacion){
 				$.ajax({
-					url: 'ejecutar_acciones.php',
-					type: 'POST',
+					url : 'ejecutar_acciones.php',
+					type : 'POST',
 					dataType: 'json',
-					async: false,
-					data: {ejecutar: 'modificar_unico_usuario', tipo : tipo, nombre: x_nombre, valor: x_valor, id: '<?php echo($idusuario); ?>'},
-					success : function(respuesta){
-						if(respuesta.exito){
-							notificacion(respuesta.mensaje,'success',4000);
-						} else {
-							notificacion(respuesta.mensaje,'warning',4000);
+					data: {ejecutar: 'validar_cedula', identificacion : x_identificacion, idusu : "<?php echo($idusuario); ?>"},
+					success : function(resultado){
+						if(!resultado.exito){
+							notificacion(resultado.mensaje,'warning',5000);
 						}
 					}
 				});
-
-				elemento_td.html(x_valor);
-				elemento_td.addClass('campo_editar');
-			} else if(tipo == 'lista_desplegable'){
-				var x_nombre = $(this).attr('id');
-				var x_valor = $(this).val();
-				//var x_etiqueta = $(this + ' option:selected').text();
-				var x_etiqueta = $("#" + x_nombre + " option:selected").text();
-
-				$.ajax({
-					url: 'ejecutar_acciones.php',
-					type: 'POST',
-					dataType: 'json',
-					async: false,
-					data: {ejecutar: 'modificar_unico_usuario', tipo : tipo, nombre: x_nombre, valor: x_valor, id: '<?php echo($idusuario); ?>'},
-					success : function(respuesta){
-						if(respuesta.exito){
-							notificacion(respuesta.mensaje,'success',4000);
-						} else {
-							notificacion(respuesta.mensaje,'warning',4000);
-						}
-					}
-				});
-
-				elemento_td.html(x_etiqueta);
-				elemento_td.attr("valor", x_valor);
-				elemento_td.addClass('campo_editar');
 			}
 		});
 
 		$("#guardar_mensualidad_formulario").click(function(){
+			var validar = $("#mensualidad").valid();
+			if(!validar){
+				return false;
+			}
+
 			var x_fechai = $("#fechai").val();
 			var x_fechaf = $("#fechaf").val();
+			var valor_ =new String($("#valor").val());
+            var x_valor = valor_.replace(/\./g,"");
 
 			if(x_fechai > x_fechaf){
 				notificacion('La fecha inicial debe ser menor a la fecha final','warning',4000);
@@ -193,11 +133,13 @@ $estado_html .= '<option value="2">Inactivo</option>';
 				type: 'POST',
 				dataType: 'json',
 				async: false,
-				data: {ejecutar: 'agregar_mensualidad', fechai : x_fechai, fechaf: x_fechaf, id: '<?php echo($idusuario); ?>'},
+				data: {ejecutar: 'agregar_mensualidad', fechai : x_fechai, fechaf: x_fechaf, valor: x_valor, id: '<?php echo($idusuario); ?>'},
 				success : function(respuesta){
 					if(respuesta.exito){
 						notificacion(respuesta.mensaje,'success',4000);
-						$("#info_mensualidad").html(respuesta.html);
+						$("#info_mensualidad").html(respuesta.info_mensualidad);
+						$("#info_estado").html(respuesta.info_estado);
+						$("#info_valor").html(respuesta.info_valor);
 					} else {
 						notificacion(respuesta.mensaje,'warning',4000);
 					}
@@ -205,157 +147,240 @@ $estado_html .= '<option value="2">Inactivo</option>';
 			});
 			
 		});
+
+		$("#tipo").change(function(){
+			var tipo = $(this).val();
+			if(tipo == 2){//
+				$("#clave").addClass("required");
+				$("#clave").parent().parent().show(1000);
+				
+				$("#clave2").addClass("required");
+				$("#clave2").parent().parent().show(1000);
+			} else {
+				$("#clave").removeClass("required");
+				$("#clave").val("");
+				$("#clave").parent().parent().hide(1000);
+				
+				$("#clave2").removeClass("required");
+				$("#clave2").val("");
+				$("#clave2").parent().parent().hide(1000);
+				
+			}
+		});
 	});
 	</script>
-  </head>
-  <body>
-	<div class="container" style="">
-		<div class="row">
-			<div class="col-md-auto">
-				<div class="card card-small">
-					<div class="card-header border-bottom">
-						<h6 class="m-0"><b>Informaci&oacute;n de usuario</b></h6>
-					</div>
-					<div class="card-body">
-						<form id="usuario_view" name="usuario_view" method="post" enctype="multipart/form-data">
-							<table class="table table-bordered" style="font-size:13px;width:100%">
-								<tr>
-									<td style="width:20%"><b>Nombres</b></td>
-									<td style="width:40%;" class="campo_editar" nombre="nombres" tipo="texto" validacion="required"><?php echo($datos_usuario[0]["nombres"]); ?></td>
-									<td style="width:40%; vertical-align: middle" rowspan="7">
-										<img src="<?php echo($defecto); ?>" class="img-fluid rounded" id="anexar_imagen" style="cursor:pointer;width:250px">
-										<input type="file" name="imagen_usuario" id="imagen_usuario" style="display:none">
-									</td>
-								</tr>
-								<tr>
-									<td><b>Apellidos</b></td>
-									<td class="campo_editar" nombre="apellidos" tipo="texto" validacion="required"><?php echo($datos_usuario[0]["apellidos"]); ?></td>
-								</tr>
-								<tr>
-									<td><b>Identificaci&oacuten</b></td>
-									<td><?php echo($datos_usuario[0]["identificacion"]); ?></td>
-								</tr>
-								<tr>
-									<td><b>Email</b></td>
-									<td class="campo_editar" nombre="email" tipo="texto" validacion="email"><?php echo($datos_usuario[0]["email"]); ?></td>
-								</tr>
-								<tr>
-									<td><b>Celular</b></td>
-									<td class="campo_editar" nombre="celular" tipo="texto" validacion="number"><?php echo($datos_usuario[0]["celular"]); ?></td>
-								</tr>
-								<tr>
-									<td><b>Tipo</b></td>
-									<td class="campo_editar" nombre="tipo" tipo="lista_desplegable" valor="<?php echo($datos_usuario[0]["tipo"]); ?>" validacion="required"><?php echo($tipo[$datos_usuario[0]["tipo"]]); ?></td>
-								</tr>
-								<tr>
-									<td><b>Estado</b></td>
-									<td class="campo_editar" nombre="estado" tipo="lista_desplegable" valor="<?php echo($datos_usuario[0]["estado"]); ?>" validacion="required"><?php echo($estado[$datos_usuario[0]["estado"]]); ?></td>
-								</tr>
-							</table>
+
+<div class="page-header row no-gutters py-4">
+  <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
+    <h3 class="page-title">Usuario</h3>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-4">
+		<div class="card card-small mb-4">
+			<div class="card-header border-bottom">
+				<h6 class="m-0"><b>Estado de usuario</b></h6>
+			</div>
+
+			<div class="card-body p-0">
+				<ul class="list-group list-group-flush">
+                    <li class="list-group-item p-3 text-center">
+						<form id="usuario_view_image" name="usuario_view_image" method="post" enctype="multipart/form-data">
+							<img src="<?php echo($defecto); ?>" class="img-fluid rounded-circle" id="anexar_imagen" style="cursor:pointer;width:250px">
+							<input type="file" name="imagen_usuario" id="imagen_usuario" style="display:none">
 						</form>
-						<div id="info_mensualidad">
-						<?php
-						echo($conexion -> obtener_texto_mensualidad($idusuario));
-						?>
-						</div>
-					</div>
-				</div>
+					</li>
+					<li class="list-group-item p-3">
+						<span class="d-flex mb-2">
+                          <i class="fas fa-flag mr-1"></i>
+                          <strong class="mr-1"> Estado:</strong>
+                          <div id="info_estado">
+							<?php
+								echo($conexion -> obtener_texto_estado_usuario($idusuario));
+							?>
+							</div>
+                        </span>
+                        <span class="d-flex mb-2">
+                        	<i class="far fa-calendar-alt mr-1"></i>
+                          	<strong class="mr-1"> Mensualidad:</strong>
+                          	<div id="info_mensualidad">
+							<?php
+								echo($conexion -> obtener_texto_mensualidad($idusuario));
+							?>
+							</div>
+                        </span>
+                        <span class="d-flex mb-2">
+                        	<i class="fas fa-dollar-sign mr-1"></i>
+                          	<strong class="mr-1"> Valor:</strong>
+                          	<div id="info_valor">
+							<?php
+								echo($conexion -> obtener_texto_valor($idusuario));
+							?>
+							</div>
+                        </span>
+					</li>
+				</ul>
 			</div>
-			
-			<div class="col-md-auto">
-				<?php
-				$fechai = date('Y-m-d');
-				$fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
-				?>
-				<div class="card card-small">
-					<div class="card-header border-bottom">
-						<h6 class="m-0"><b>Mensualidad</b></h6>
-					</div>
-					<div class="card-body">
-				        <div class="form-group">
-				        	<label class="">Fecha inicial</label>
-				        	<div class="input-group" id="capa_fechai">
-					    		<input type="text" class="form-control date" id="fechai" readonly="" value="<?php echo($fechai); ?>">
-					    		<div class="input-group-append" id="ejecutar_fechai">
-									<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-								</div>
-					    	</div>
-					    </div>
-
-					    <div class="form-group">
-				        	<label class="">Fecha final</label>
-				        	<div class="input-group" id="capa_fechaf">
-					    		<input type="text" class="form-control date" id="fechaf" readonly="" value="<?php echo($fechaf); ?>">
-					    		<div class="input-group-append" id="ejecutar_fechaf">
-									<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-								</div>
-					    	</div>
-					    </div>
-
-					    <button id="guardar_mensualidad_formulario" class="mb-2 btn btn-outline-success mr-2" type="button">Registrar</button>
-						     
-					    <script type="text/javascript">
-				            $('#fechai').datepicker({
-				            	language : 'es',
-				           		format: 'yyyy-mm-dd',
-				           		autoclose: true,
-				           		setEndDate: new Date(<?php echo($fechaf); ?>)
-							}).on('changeDate',function(event){
-								var dia_mas = new Date(event.date);
-								var fechaf = new Date(event.date);
-
-								var nueva_fecha2 = dia_mas.setDate(dia_mas.getDate() + 1);
-								var fecha_formateada2 = $.format.date(nueva_fecha2, "yyyy-MM-dd");
-    							$('#fechaf').datepicker('setStartDate', new Date(fecha_formateada2));
-
-								var nueva_fecha = fechaf.setMonth(fechaf.getMonth() + 1);
-								nueva_fecha = fechaf.setDate(fechaf.getDate());
-								var fecha_formateada = $.format.date(nueva_fecha, "yyyy-MM-dd");
-								$("#fechaf").val(fecha_formateada);
-							});
-							$('#fechaf').datepicker({
-				            	language : 'es',
-				           		format: 'yyyy-mm-dd',
-				           		autoclose: true,
-				           		setStartDate : new Date(<?php echo($fechai); ?>)
-							}).on('changeDate', function(event){
-								var endDate = new Date(event.date.valueOf());
-    							$('#fechai').datepicker('setEndDate', endDate);
-							});
-
-				            $("#ejecutar_fechai").click(function(){
-				            	$("#fechai").datepicker('show');
-				            });
-				            $("#ejecutar_fechaf").click(function(){
-				            	$("#fechaf").datepicker('show');
-				            });
-					    </script>
-					</div>
-				</div>
-			</div>
-
-			<!--div class="col-md-auto">
-				<div class="card card-small">
-					<div class="card-header border-bottom">
-						<h6 class="m-0">Registro de ingresos</h6>
-					</div>
-					<div class="card-body">
-						
-					</div>
-				</div>
-			</div>
-
-			<div class="col-md-auto">
-				<div class="card card-small">
-					<div class="card-header border-bottom">
-						<h6 class="m-0">Rutina</h6>
-					</div>
-					<div class="card-body">
-						
-					</div>
-				</div>
-			</div-->
 		</div>
 	</div>
-  </body>
-</html>
+	<div class="col-lg-5">
+		<div class="card card-small mb-4">
+			<div class="card-header border-bottom">
+		    	<h6 class="m-0">Informaci&oacute;n de usuario</h6>
+		    </div>
+			<div class="card-body">
+				<form id="usuario_view" name="usuario_view" method="post" enctype="multipart/form-data">
+					<div class="form-row">
+						<div class="form-group col-md-6">
+			                <label>Tipo de usuario</label>
+			                <select class="form-control" id="tipo" name="tipo">
+			                	<option value="">Tipo de usuario</option>
+								<option value="1" <?php if($datos_usuario[0]["tipo"] == 1)echo("selected"); ?>>Cliente</option>
+								<option value="2" <?php if($datos_usuario[0]["tipo"] == 2)echo("selected"); ?>>Administrador</option>
+			                </select>
+			            </div>
+			            <div class="form-group col-md-6">
+							<label class="">Identificaci&oacute;n*</label>
+							<input type="text" id="identificacion" name="identificacion" class="form-control required number" value="<?php echo($datos_usuario[0]["identificacion"]); ?>">
+						</div>
+					</div>
+					<div class="form-row" style="display: none;">
+						<div class="form-group col-md-6">
+							<label class="">Clave*</label>
+							<input type="password" id="clave" name="clave" class="form-control" value="">
+						</div>
+						<div class="form-group col-md-6">
+							<label class="">Repita su clave*</label>
+							<input type="password" id="clave2" class="form-control" equalTo="#clave">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label class="">Nombres*</label>
+							<input type="text" id="nombre" name="nombres" class="form-control required" value="<?php echo($datos_usuario[0]["nombres"]); ?>">
+						</div>
+						<div class="form-group col-md-6">
+							<label class="">Apellidos*</label>
+							<input type="text" id="apellido" name="apellidos" class="form-control required" value="<?php echo($datos_usuario[0]["apellidos"]); ?>">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label class="">Email</label>
+							<input type="text" id="email" name="email" class="form-control email" value="<?php echo($datos_usuario[0]["email"]); ?>">
+						</div>
+						<div class="form-group col-md-6">
+							<label class="">Celular</label>
+							<input type="text" id="celular" name="celular" class="form-control" value="<?php echo($datos_usuario[0]["celular"]); ?>">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="">Estado*</label>
+						<select class="form-control custom-select required" id="estado" name="estado">
+							<option value="">Estado</option>
+							<option value="1" <?php if($datos_usuario[0]["estado"] == 1)echo("selected"); ?>>Activo</option>
+							<option value="2" <?php if($datos_usuario[0]["estado"] == 2)echo("selected"); ?>>Inactivo</option>
+						</select>
+					</div>
+					<button type="button" id="actualizar_usuario_formulario" class="btn btn-accent">Actualizar</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-lg-3">
+		<?php
+		$fechai = date('Y-m-d');
+		$fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
+		?>
+		<div class="card card-small">
+			<div class="card-header border-bottom">
+				<h6 class="m-0"><b>Mensualidad</b></h6>
+			</div>
+			<div class="card-body">
+				<form id="mensualidad" name="mensualidad" method="post" enctype="multipart/form-data">
+			        <div class="form-group">
+			        	<label class="">Fecha inicial</label>
+			        	<div class="input-group" id="capa_fechai">
+				    		<input type="text" class="form-control date" id="fechai" readonly="" value="<?php echo($fechai); ?>">
+				    		<div class="input-group-append" id="ejecutar_fechai">
+								<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+							</div>
+				    	</div>
+				    </div>
+
+				    <div class="form-group">
+			        	<label class="">Fecha final</label>
+			        	<div class="input-group" id="capa_fechaf">
+				    		<input type="text" class="form-control date" id="fechaf" readonly="" value="<?php echo($fechaf); ?>">
+				    		<div class="input-group-append" id="ejecutar_fechaf">
+								<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+							</div>
+				    	</div>
+				    </div>
+
+				    <div class="form-group">
+						<label class="">Valor*</label>
+						<input type="text" id="valor" name="valor" class="form-control required" value="">
+					</div>
+
+				    <button id="guardar_mensualidad_formulario" class="btn btn-accent" type="button">Registrar</button>
+				</form>
+				     
+			    <script type="text/javascript">
+		            $('#fechai').datepicker({
+		            	language : 'es',
+		           		format: 'yyyy-mm-dd',
+		           		autoclose: true,
+		           		setEndDate: new Date(<?php echo($fechaf); ?>)
+					}).on('changeDate',function(event){
+						var dia_mas = new Date(event.date);
+						var fechaf = new Date(event.date);
+
+						var nueva_fecha2 = dia_mas.setDate(dia_mas.getDate() + 1);
+						var fecha_formateada2 = $.format.date(nueva_fecha2, "yyyy-MM-dd");
+						$('#fechaf').datepicker('setStartDate', new Date(fecha_formateada2));
+
+						var nueva_fecha = fechaf.setMonth(fechaf.getMonth() + 1);
+						nueva_fecha = fechaf.setDate(fechaf.getDate());
+						var fecha_formateada = $.format.date(nueva_fecha, "yyyy-MM-dd");
+						$("#fechaf").val(fecha_formateada);
+					});
+					$('#fechaf').datepicker({
+		            	language : 'es',
+		           		format: 'yyyy-mm-dd',
+		           		autoclose: true,
+		           		setStartDate : new Date(<?php echo($fechai); ?>)
+					}).on('changeDate', function(event){
+						var endDate = new Date(event.date.valueOf());
+						$('#fechai').datepicker('setEndDate', endDate);
+					});
+
+		            $("#ejecutar_fechai").click(function(){
+		            	$("#fechai").datepicker('show');
+		            });
+		            $("#ejecutar_fechaf").click(function(){
+		            	$("#fechaf").datepicker('show');
+		            });
+
+		            $("#valor").keyup(function(){
+			            var valor=$(this).val().replace(/[^0-9]/g, '');
+			            $(this).val(Moneda_r(valor));
+			        });
+
+		            function Moneda_r(valor){
+			            var num = valor.replace(/\./g,'');
+			            if(!isNaN(num)){
+			                 num = num.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g,'$1.');
+			                num = num.split('').reverse().join('').replace(/^[\.]/,'');
+			                return(num);
+			            }
+			        }
+			    </script>
+			</div>
+		</div>
+	</div>
+</div>
+
+<?php echo(pie()); ?>
