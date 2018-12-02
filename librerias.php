@@ -21,13 +21,46 @@ function jquery_js(){
 	return($texto);
 }
 function notificacion(){
-	global $raiz; 
+	global $raiz, $conexion; 
 	//$texto='<script src="' . $raiz . 'js/jquery.growl.js"></script>';
 	//$texto.='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/jquery.growl.css">';
 
-	$texto='<script src="' . $raiz . 'js/pnotify.custom.js"></script>';
-	$texto.='<script src="' . $raiz . 'js/librerias_notificacion.js"></script>';
-	$texto.='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/pnotify.custom.css">';
+	//$texto='<script src="' . $raiz . 'js/pnotify.custom.js"></script>';
+	//$texto.='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/pnotify.custom.css">';
+
+	$texto = '<script src="' . $raiz . 'notificacion/toastr.js"></script>';
+	$texto .= '<link rel="stylesheet" type="text/css" href="' . $raiz . 'notificacion/toastr.css">';
+
+	$texto .= '<script src="' . $raiz . 'js/librerias_notificacion.js"></script>';
+
+	$movil = $conexion -> detectar_movil();
+	if(@$movil == 'phone'){
+		$position = "bottom-center";
+	} else {
+		$position = "top-center";
+	}
+
+	$texto .= '<script>
+	toastr.options = {
+	  "closeButton": false,
+	  "debug": false,
+	  "newestOnTop": false,
+	  "progressBar": false,
+	  "rtl": false,
+	  "positionClass": "toast-' . $position . '",
+	  "preventDuplicates": false,
+	  "onclick": null,
+	  "showDuration": 300,
+	  "hideDuration": 1000,
+	  "timeOut": 5000,
+	  "extendedTimeOut": 1000,
+	  "showEasing": "swing",
+	  "hideEasing": "linear",
+	  "showMethod": "fadeIn",
+	  "hideMethod": "fadeOut"
+	}
+	</script>';
+
 	return($texto);
 }
 function login_css(){

@@ -48,11 +48,6 @@ function buscar_ingreso_usuario(){
 		if($idusu){
 			$imagen = $conexion -> obtener_imagen_usuario($idusu);
 			$datos = $conexion -> obtener_datos_usuario($idusu);
-			$cant_dias_mensualidad = $conexion -> restar_fecha($datos[0]["fechai"],$datos[0]["fechaf"]);
-			$dias_activos = $conexion -> restar_fecha($datos[0]["fechai"],date('Y-m-d'));
-			
-			$resultado = round((100 * $dias_activos) / $cant_dias_mensualidad);
-
 
 			$retorno["exito"] = 1;
 			$retorno["mensaje"] = "Usuario encontrado!";
@@ -60,7 +55,7 @@ function buscar_ingreso_usuario(){
 			$adicional = "";
 			$html2 = "";
 			
-			$html .= '<h4 class="mb-0">' . $datos[0]["nombres"] . " " . $datos[0]["apellidos"] . '</h4>';
+			$html .= '<h4 class="mb-0"><a href="' . $atras . 'ventanas/usuario/ver_usuario.php?idusuario=' . $idusu . '">' . $datos[0]["nombres"] . " " . $datos[0]["apellidos"] . '</a></h4>';
 			$html .= '<span class="text-muted d-block mb-2">' . $identificacion . '</span>';
 			$html .= '<input type="hidden" id="valor_idusu" value="' . $idusu . '">';
 
@@ -71,10 +66,11 @@ function buscar_ingreso_usuario(){
 			} else {
 				$retorno["imagen"] = $atras . "img/sin_foto.png";
 			}
-			$retorno["porcentaje"] = $resultado;
 
 			$html2 .= '<span class="d-flex mb-2"><i class="far fa-calendar-alt mr-1"></i><strong class="mr-1"> Mensualidad:</strong>';
             $html2 .= '<div id="info_mensualidad">' . $conexion -> obtener_texto_mensualidad($idusu) . '</div></span>';
+            $html2 .= '<span class="d-flex mb-2"><i class="far fa-clock mr-1"></i><strong class="mr-1"> D&iacute;as faltantes:</strong>';
+            $html2 .= '<div id="info_dias_faltantes">' . $conexion -> obtener_dias_faltantes($idusu) . '</div></span>';
 
 			$retorno["info_adicional"] = $html2;
 		} else {
@@ -98,8 +94,26 @@ function confirmar_ingreso_usuario(){
 		if($resultado["mensaje"] == 'insertado'){
 			$retorno["exito"] = 0;
 			$retorno["mensaje"] = "Usuario ya ingresado en el dia de hoy";
+		} else if($resultado["mensaje"] == 'inactivo'){
+			$retorno["exito"] = 0;
+			$retorno["mensaje"] = "Usuario se encuentra inactivo";
+		} else if($resultado["mensaje"] == 'fuera_rango'){
+			$retorno["exito"] = 0;
+			$retorno["mensaje"] = "Usuario se encuentra fuera del rango de la mensualidad";
 		}
 	}
+
+	echo(json_encode($retorno));
+}
+function total_ingresados(){
+	global $conexion;
+	$retorno = array();
+
+	$fecha = date('Y-m-d');
+	$total_ingresados = $conexion -> total_ingresados($fecha);
+
+	$retorno["exito"] = 1;
+	$retorno["total_ingresados"] = $total_ingresados;
 
 	echo(json_encode($retorno));
 }

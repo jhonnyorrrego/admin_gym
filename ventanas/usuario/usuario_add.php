@@ -44,7 +44,7 @@ $().ready(function() {
 					if(resultado.exito){
 						notificacion(resultado.mensaje,'success',5000);
 						
-						window.open("ver_usuario.php?idusuario=" + resultado.idusu, '_self');
+						setTimeout(function(){window.open("ver_usuario.php?idusuario=" + resultado.idusu, '_self');},1500); 
 					}else{
 						notificacion(resultado.mensaje,'warning',5000);
 					}
@@ -101,7 +101,7 @@ $().ready(function() {
 </div>
 
 <div class="row">
-  <div class="col-lg-8">
+  <div class="col-lg-4">
     <div class="card card-small mb-4">
       <div class="card-header border-bottom">
         <h6 class="m-0">Datos de usuario</h6>
@@ -122,7 +122,7 @@ $().ready(function() {
 
 	            <div class="form-group">
 					<label class="">Identificaci&oacute;n*</label>
-					<input type="text" id="identificacion" name="identificacion" class="form-control required number">
+					<input type="number" id="identificacion" name="identificacion" class="form-control required number" pattern="[0-9]*">
 				</div>
 				<div class="form-group" style="display:none">
 					<label class="">Clave*</label>
@@ -156,7 +156,7 @@ $().ready(function() {
 						<option value="2">Inactivo</option>
 					</select>
 				</div>
-                <button type="button" id="guardar_usuario_formulario" class="btn btn-accent">Registrar</button>
+                <button type="button" id="guardar_usuario_formulario" class="btn btn-outline-success">Registrar</button>
               </form>
             </div>
           </div>

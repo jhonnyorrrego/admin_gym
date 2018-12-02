@@ -42,7 +42,7 @@ class lib_gym{
 		$id=mysqli_insert_id($this->con);
 		return($id);
 	}
-	/*Modificar campo por campo
+	/*Modificar
 	$tabla = Nombre de la tabla a modificar
 	$valor = Arreglo del(os) Valor(es) nuevo(s)
 	$condicion_update = filtro para realizar el update
@@ -54,7 +54,7 @@ class lib_gym{
 	}
 	/*Detecta si el dispositivo en el que se abrio la aplicacion es movil o computador
 	*/
-	public function detectar_movil($session){
+	public function detectar_movil($session=false){
 		$detect = new Mobile_Detect;
 		$deviceType = ($detect->isMobile() ? ($detect->isTablet() ? 'tablet' : 'phone') : 'computer');
 
@@ -78,7 +78,7 @@ class lib_gym{
 		return($datos);
 	}
 	public function obtener_idusu_usuario($identificacion){
-		$consulta = "select idusu from usuario where identificacion=" . $identificacion;
+		$consulta = "select idusu from usuario where identificacion='" . $identificacion . "'";
 		$datos = $this -> listar_datos($consulta);
 		$idusu = "";
 
@@ -103,6 +103,20 @@ class lib_gym{
 	public function ingreso_usuario($idusu){
 		$hoy = date('Y-m-d');
 		$retorno = array();
+
+		$datos_usuario = $this -> obtener_datos_usuario($idusu);
+		if($datos_usuario[0]["estado"] == 2){//Si el usuario esta inactivo no debe dejar ingresar
+			$retorno["exito"] = 0;
+			$retorno["mensaje"] = "inactivo";
+
+			return($retorno);
+		}
+		if(!($hoy >= $datos_usuario[0]["fechai"] && $hoy <= $datos_usuario[0]["fechaf"])){//Si el usuario esta fuera del rango de la mensualidad
+			$retorno["exito"] = 0;
+			$retorno["mensaje"] = "fuera_rango";
+
+			return($retorno);
+		}
 
 		$consultar_ingreso = "select * from ingreso a where a.idusu=" . $idusu . " and date_format(a.fecha,'%Y-%m-%d')='" . $hoy . "'";
 		$ingresos_array = $this -> listar_datos($consultar_ingreso);
@@ -193,13 +207,19 @@ class lib_gym{
 	  	}
 	 	return($destino);
 	}
+	/*
+	obtener_texto_mensualidad
+	Recibe el idusu
+	Retorna una cadena
+	funcion encargada de mostrar el rango de la mensualidad asignada
+	*/
 	public function obtener_texto_mensualidad($idusu){
-		$consulta = "select date_format(fechai, '%Y-%m-%d') as x_fechai, date_format(fechaf, '%Y-%m-%d') as x_fechaf from mensualidad where idusu=" . $idusu . " order by idmen desc";
+		$consulta = "select date_format(fechai, '%Y-%m-%d') as x_fechai, date_format(fechaf, '%Y-%m-%d') as x_fechaf from usuario where idusu=" . $idusu;
 		$datos = $this -> listar_datos($consulta,0,1);
 
 		$texto = "";
 
-		if($datos["cant_resultados"]){
+		if($datos["cant_resultados"] && $datos[0]["x_fechai"] && $datos[0]["x_fechaf"]){
 			$texto = "<span class='badge badge-success'>Desde " . $datos[0]["x_fechai"] . " hasta " . $datos[0]["x_fechaf"] . "</span>";
 		} else {
 			$texto = "<span class='badge badge-danger'>Usuario pendiente por mensualidad</span>";
@@ -207,6 +227,12 @@ class lib_gym{
 
 		return($texto);
 	}
+	/*
+	obtener_texto_estado_usuario
+	Recibe el idusu
+	Retorna una cadena
+	funcion encargada de mostrar el estado del usuario
+	*/
 	public function obtener_texto_estado_usuario($idusu){
 		$hoy = date('Y-m-d');
 
@@ -232,6 +258,12 @@ class lib_gym{
 
 		return($texto);
 	}
+	/*
+	obtener_texto_valor
+	recibe idusu
+	retorna una cadena
+	Funcion encargada de retornar el valor de la ultima mensualidad asignada
+	*/
 	public function obtener_texto_valor($idusu){
 		$consulta = "select a.valor from mensualidad a where a.idusu=" . $idusu . " order by idmen desc";
 		$datos = $this -> listar_datos($consulta,0,1);
@@ -242,17 +274,58 @@ class lib_gym{
 		}
 		return($valor);
 	}
+	/*
+	total_ingresados
+	recibe fecha en formato Y-m-d
+	Retorna un entero
+	Funcion encargada de retornar la cantidad de usuarios ingresados en la fecha recibida
+	*/
+	public function total_ingresados($fecha){
+		$consulta = "select count(*) as cantidad from ingreso where date_format(fecha, '%Y-%m-%d')='" . $fecha . "'";
+		$datos = $this -> listar_datos($consulta);
+
+		return(@$datos[0]["cantidad"]);
+	}
+	public function obtener_dias_faltantes($idusu){
+		$datos = $this -> obtener_datos_usuario($idusu);
+
+		if($datos[0]["fechaf"]){
+			$dias_faltantes = $this -> restar_fecha($datos[0]["fechaf"],date('Y-m-d'));
+
+			$clase = "";
+
+			if($dias_faltantes > 5){
+				$clase = "success";
+			} else if($dias_faltantes <= 5 && $dias_faltantes > 0){
+				$clase = "warning";
+			}else {
+				$clase = "danger";
+			}
+
+			$cadena = '<span class="badge badge-' . $clase . '">' . $dias_faltantes . '</span>';
+		} else {
+			$cadena = '<span class="badge badge-danger">0</span>';
+		}
+		return($cadena);
+	}
+	/*
+	sumar_fecha
+	funcion encargada de sumar o restar a una fecha x dias
+	retorna la nueva fecha
+	*/
 	public function sumar_fecha($fecha,$cantidad,$tipo,$formato){
 		$actual = strtotime($fecha);
   		$nuevo = date($formato, strtotime($cantidad . " " . $tipo, $actual));
   		return($nuevo);
 	}
 	public function restar_fecha($fechai,$fechaf){
-		$date1 = new DateTime($fechai);
-		$date2 = new DateTime($fechaf);
-		$diff = $date1->diff($date2);
-		
-		return($diff->days);
+		if(!is_integer($fechai)){
+			$date1 = strtotime($fechai);
+		}
+		if(!is_integer($fechaf)){
+			$date2 = strtotime($fechaf);
+		}
+		return floor(($date1 - $date2) / 60 / 60 / 24);
 	}
 	public function iniciar_variables_sesiones($datos){
 		$_SESSION["usuario" . LLAVE_SESION] = $datos[0]["identificacion"];
@@ -260,7 +333,7 @@ class lib_gym{
 		$_SESSION["idusu"] = $datos[0]["idusu"];
 		$_SESSION["nombres"] = $datos[0]["nombres"];
 		$_SESSION["apellidos"] = $datos[0]["apellidos"];
-		$_SESSION["img"] = '../archivos/2018/11/01/1/yulian.jpg';
+		$_SESSION["img"] = $this -> obtener_imagen_usuario($datos[0]["idusu"]);
 	}
 	public function cerrar_sesion(){
 		@session_unset();

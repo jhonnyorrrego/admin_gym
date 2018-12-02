@@ -140,6 +140,9 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 						$("#info_mensualidad").html(respuesta.info_mensualidad);
 						$("#info_estado").html(respuesta.info_estado);
 						$("#info_valor").html(respuesta.info_valor);
+						$("#info_dias_faltantes").html(respuesta.info_dias_faltantes);
+						
+						$('html, body').animate({ scrollTop: $('#capa_informacion_usuario').offset().top -80 }, 'slow');
 					} else {
 						notificacion(respuesta.mensaje,'warning',4000);
 					}
@@ -167,6 +170,28 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 				
 			}
 		});
+
+		$("#confirmar_ingreso").click(function(){
+			if(!confirm('Está seguro de ingresar este usuario?')){
+				return false;
+			}
+
+	 		var x_idusu = '<?php echo($idusuario); ?>';
+	 		$.ajax({
+	 			url: '<?php echo($atras); ?>ventanas/ingreso/ejecutar_acciones.php',
+	 			type: 'POST',
+				dataType: 'json',
+				async: false,
+				data: {ejecutar: 'confirmar_ingreso_usuario', idusu : x_idusu},
+				success : function(respuesta){
+					if(respuesta.exito){
+						notificacion(respuesta.mensaje,'success',4000);
+					} else {
+						notificacion(respuesta.mensaje,'warning',4000);
+					}
+				}
+	 		});
+	 	});
 	});
 	</script>
 
@@ -177,7 +202,7 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 </div>
 
 <div class="row">
-  <div class="col-lg-4">
+  <div id="capa_informacion_usuario" class="col-lg-4">
 		<div class="card card-small mb-4">
 			<div class="card-header border-bottom">
 				<h6 class="m-0"><b>Estado de usuario</b></h6>
@@ -190,6 +215,10 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 							<img src="<?php echo($defecto); ?>" class="img-fluid rounded-circle" id="anexar_imagen" style="cursor:pointer;width:250px">
 							<input type="file" name="imagen_usuario" id="imagen_usuario" style="display:none">
 						</form>
+
+						<button type="button" class="mb-2 btn btn-sm btn-pill btn-outline-success mr-2" id="confirmar_ingreso">
+                      		<i class="fas fa-check-circle mr-1"></i>Ingresar
+                  		</button>
 					</li>
 					<li class="list-group-item p-3">
 						<span class="d-flex mb-2">
@@ -218,6 +247,15 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 								echo($conexion -> obtener_texto_valor($idusuario));
 							?>
 							</div>
+                        </span>
+                        <span class="d-flex mb-2">
+                        	<i class="far fa-clock mr-1"></i>
+                        	<strong class="mr-1"> D&iacute;as faltantes:</strong>
+                        	<div id="info_dias_faltantes">
+                        		<?php
+								echo($conexion -> obtener_dias_faltantes($idusuario));
+								?>
+                        	</div>
                         </span>
 					</li>
 				</ul>
@@ -283,7 +321,7 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 							<option value="2" <?php if($datos_usuario[0]["estado"] == 2)echo("selected"); ?>>Inactivo</option>
 						</select>
 					</div>
-					<button type="button" id="actualizar_usuario_formulario" class="btn btn-accent">Actualizar</button>
+					<button type="button" id="actualizar_usuario_formulario" class="btn btn-outline-success">Actualizar</button>
 				</form>
 			</div>
 		</div>
@@ -294,7 +332,7 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 		$fechai = date('Y-m-d');
 		$fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 		?>
-		<div class="card card-small">
+		<div class="card card-small mb-4">
 			<div class="card-header border-bottom">
 				<h6 class="m-0"><b>Mensualidad</b></h6>
 			</div>
@@ -325,7 +363,7 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 						<input type="text" id="valor" name="valor" class="form-control required" value="">
 					</div>
 
-				    <button id="guardar_mensualidad_formulario" class="btn btn-accent" type="button">Registrar</button>
+				    <button id="guardar_mensualidad_formulario" class="btn btn-outline-success" type="button">Registrar</button>
 				</form>
 				     
 			    <script type="text/javascript">
@@ -378,6 +416,22 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 			            }
 			        }
 			    </script>
+			</div>
+		</div>
+	</div>
+
+	<div id="capa_informacion_usuario" class="col-lg-4">
+		<div class="card card-small mb-4">
+			<div class="card-header border-bottom">
+				<h6 class="m-0"><b>Anexos</b></h6>
+			</div>
+
+			<div class="card-body">
+				<form id="anexos_usuario" name="anexos_usuario" method="post" enctype="multipart/form-data">
+					<div class="form-group">
+						<input type="file" name="anexos" class="form-control-file btn">
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>

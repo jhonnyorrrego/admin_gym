@@ -137,6 +137,32 @@ function guardar_imagen(){
 
 	echo json_encode($retorno);
 }
+function guardar_anexos_usuario(){
+	global $conexion, $atras;
+	$retorno = array();
+
+	$idusu = @$_REQUEST["idusu"];
+	$idanexos = $conexion -> procesar_anexos($idusu, $atras);
+
+	$tabla = 'usuario';
+	$valor_guardar[] = "imagen='" . $idanexos . "'";
+	$condicion = "idusu=" . $idusu;
+
+	$conexion -> modificar($tabla,$valor_guardar,$condicion,$idusu);
+
+	if($idanexos){
+		$imagen = $atras . ALMACENAMIENTO .  $conexion -> obtener_imagen_usuario($idusu);
+
+		$retorno["exito"] = 1;
+		$retorno["mensaje"] = 'Imagen guardada';
+		$retorno["imagen"] = $imagen;
+	} else {
+		$retorno["exito"] = 0;
+		$retorno["mensaje"] = 'Problemas al guardar la imagen';
+	}
+
+	echo json_encode($retorno);
+}
 function agregar_mensualidad(){
 	global $conexion;
 	$retorno = array();
@@ -173,6 +199,7 @@ function agregar_mensualidad(){
 		$retorno["info_mensualidad"] = $conexion -> obtener_texto_mensualidad($id);
 		$retorno["info_estado"] = $conexion -> obtener_texto_estado_usuario($id);
 		$retorno["info_valor"] = $conexion -> obtener_texto_valor($id);
+		$retorno["info_dias_faltantes"] = $conexion -> obtener_dias_faltantes($id);
 	}else{
 		$retorno["exito"] = 0;
 		$retorno["mensaje"] = "Problemas en la inserci&oacute;n";
