@@ -163,6 +163,23 @@ function guardar_anexos_usuario(){
 
 	echo json_encode($retorno);
 }
+function guardar_anexo(){
+	global $conexion, $atras;
+	$retorno = array();
+
+	$idusu = @$_REQUEST["idusu"];
+	$idanexos = $conexion -> procesar_anexos($idusu, $atras);
+
+	if($idanexos){
+		$retorno["exito"] = 1;
+		$retorno["mensaje"] = 'Anexo guardado';
+	} else {
+		$retorno["exito"] = 0;
+		$retorno["mensaje"] = 'Problemas al guardar el anexo';
+	}
+
+	echo json_encode($retorno);
+}
 function agregar_mensualidad(){
 	global $conexion;
 	$retorno = array();
@@ -204,6 +221,56 @@ function agregar_mensualidad(){
 		$retorno["exito"] = 0;
 		$retorno["mensaje"] = "Problemas en la inserci&oacute;n";
 	}
+	echo(json_encode($retorno));
+}
+function listar_anexos(){
+	global $conexion, $atras;
+	$retorno = array();
+	$idusu = @$_REQUEST["idusu"];
+
+	$consulta = "select a.etiqueta, a.idane from anexo a, anexo_usuario b where b.fk_idusu=" . $idusu . " and b.fk_idane=a.idane and a.estado=1";
+	$anexos = $conexion -> listar_datos($consulta);
+
+	if($anexos["cant_resultados"]){
+		$cadena = "";
+
+		for ($i=0; $i < $anexos["cant_resultados"]; $i++) { 
+			$etiqueta = html_entity_decode($anexos[$i]["etiqueta"]);
+			if(strlen($etiqueta) > 25){
+				$etiqueta = substr($anexos[$i]["etiqueta"], 0, 25) . " ...";
+			}
+
+			$cadena .= '<div class="row">
+							<div class="col-9">
+                          		<strong class="" title="' . $anexos[$i]["etiqueta"] . '">' . $etiqueta . '</strong>
+                          	</div>
+                          	<div class="col-3 text-right">
+                          		<i style="cursor:pointer" class="fas fa-download enlace_anexo" enlace="' . $atras . "ventanas/anexo/ver_anexo.php?idane=" . $anexos[$i]["idane"] . '"></i>
+                          		<i style="cursor:pointer" class="far fa-trash-alt enlace_anexo_eliminar" idane="' . $anexos[$i]["idane"] . '"></i>
+                          	</div>
+                         </div>';
+		}
+		$cadena .= '';
+
+		$retorno["lista_anexos"] = $cadena;
+		$retorno["exito"] = 1;
+	} else {
+		$retorno["lista_anexos"] = '';
+		$retorno["exito"] = 0;
+	}
+
+	echo(json_encode($retorno));
+}
+function eliminar_anexo(){
+	global $conexion, $atras;
+	$retorno = array();
+
+	$idane = @$_REQUEST["idane"];
+	$conexion -> eliminar_anexo_usuario($idane);
+
+	$retorno["exito"] = 1;
+	$retorno["mensaje"] = "Anexo eliminado";
+
 	echo(json_encode($retorno));
 }
 

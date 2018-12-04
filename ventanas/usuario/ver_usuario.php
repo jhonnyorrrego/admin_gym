@@ -35,12 +35,16 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
   	</style>
 	<script type='text/javascript'>
 	$().ready(function() {
+		listar_anexos();
 		$('html, body').animate({scrollTop:0}, 'slow');
 		$('#usuario_view').validate();
 		$('#mensualidad').validate();
 
 		$('#anexar_imagen').click(function(){
 			$("#imagen_usuario").click();
+		});
+		$('#anexar').click(function(){
+			$("#anexos").click();
 		});
 		
 		$("#imagen_usuario").change(function(){
@@ -66,6 +70,61 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 					}
 				}
 			});
+		});
+
+		$("#anexos").change(function(){
+			var formData = new FormData(document.getElementById("anexos_usuario"));
+			formData.append('idusu', '<?php echo($idusuario); ?>');
+			formData.append('ejecutar', 'guardar_anexo');
+			
+			$.ajax({
+				url : 'ejecutar_acciones.php',
+				type : 'POST',
+				dataType: 'json',
+				async: false,
+				cache: false,
+				contentType: false,
+				processData: false,
+				data : formData,
+				success : function(respuesta){
+					if(respuesta.exito){
+						notificacion(respuesta.mensaje,'success',4000);
+						
+						listar_anexos();
+					} else {
+						notificacion(respuesta.mensaje,'warning',4000);
+					}
+				}
+			});
+		});
+
+		$(document).on('click' , '.enlace_anexo' , function() {
+			var enlace = $(this).attr("enlace");
+
+			window.open(enlace, '_blank');
+		});
+
+		$(document).on('click' , '.enlace_anexo_eliminar' , function() {
+			var x_idane = $(this).attr("idane");
+			if(!confirm("Esta seguro de eliminar este anexo?")){
+				return false;
+			}
+			
+			if(x_idane){
+				$.ajax({
+					url : 'ejecutar_acciones.php',
+					type : 'POST',
+					dataType: 'json',
+					data: {ejecutar: 'eliminar_anexo', idane : x_idane},
+					success : function(resultado){
+						if(resultado.exito){
+							notificacion(resultado.mensaje,'success',5000);
+
+							listar_anexos();
+						}
+					}
+				});
+			}
 		});
 
 		$(document).on('click' , '#actualizar_usuario_formulario' , function() {
@@ -193,6 +252,23 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 	 		});
 	 	});
 	});
+
+	function listar_anexos(){
+		var x_idusu = '<?php echo($idusuario); ?>';
+		$.ajax({
+	 			url: 'ejecutar_acciones.php',
+	 			type: 'POST',
+				dataType: 'json',
+				data: {ejecutar: 'listar_anexos', idusu : x_idusu},
+				success : function(respuesta){
+					if(respuesta.exito){
+						$("#li_anexos").html(respuesta.lista_anexos);
+					} else {
+						$("#li_anexos").html("");
+					}
+				}
+	 		});
+	}
 	</script>
 
 <div class="page-header row no-gutters py-4">
@@ -426,12 +502,15 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 				<h6 class="m-0"><b>Anexos</b></h6>
 			</div>
 
-			<div class="card-body">
+			<div class="card-body border-bottom text-center">
 				<form id="anexos_usuario" name="anexos_usuario" method="post" enctype="multipart/form-data">
-					<div class="form-group">
-						<input type="file" name="anexos" class="form-control-file btn">
-					</div>
+						<button type="button" class="btn btn-outline-success" id="anexar">Anexar</button>
+						<input type="file" name="anexos" id="anexos" style="display:none">
 				</form>
+			</div>
+
+			<div id="li_anexos" class="card-body">
+
 			</div>
 		</div>
 	</div>

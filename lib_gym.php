@@ -91,7 +91,7 @@ class lib_gym{
 		return($idusu);
 	}
 	public function obtener_imagen_usuario($idusu){
-		$consulta = "select b.ruta from usuario a, anexo b where idusu=" . $idusu . " and a.imagen=b.idane";
+		$consulta = "select b.ruta from usuario a, anexo b where idusu=" . $idusu . " and a.imagen=b.idane and b.estado=1";
 		$datos = $this -> listar_datos($consulta);
 
 		if($datos["cant_resultados"]){
@@ -152,17 +152,23 @@ class lib_gym{
 
 		return($retorno);
 	}
+	/*
+	Funcion encargada de realizar la estructuración de las carpetas en el servidor
+	*/
 	public function parsear_ruta_almacenamiento($idusu,$atras){
 		$consulta = "select date_format(a.fecha, '%Y-%m-%d') as x_fecha from usuario a where idusu=" . $idusu;
 		$resultados = $this -> listar_datos($consulta);
 
 		$datos_fecha = explode("-", $resultados[0]["x_fecha"]);
-		$ruta = ALMACENAMIENTO . $datos_fecha[0] . "/" . $datos_fecha[1] . "/" . $datos_fecha[2] . "/" . $idusu . "/";
+		$ruta = ALMACENAMIENTO . $idusu . "/" . $datos_fecha[0] . "/" . $datos_fecha[1] . "/" . $datos_fecha[2] . "/";
 
 		$this -> crear_carpetas($atras . $ruta);
 
 		return $ruta;
 	}
+	/*
+	funcion encargada de obtener arreglo $_FILES y realizar el proceso de guardado sobre las carpetas del servidor
+	*/
 	public function procesar_anexos($idusu, $atras){
 		$idane = array();
 
@@ -174,19 +180,33 @@ class lib_gym{
 			$info_anexo = pathinfo($value["name"]);
 
 			$nombre = $value["name"];
+			$nuevo_nombre = rand(0,9999999) . "." . $info_anexo["extension"];
 			$tamano = $value["size"];
 			$ruta_temporal = $value["tmp_name"];
 			$extension = $info_anexo["extension"];
 
-			$ruta = $this -> parsear_ruta_almacenamiento($idusu, $atras) . $nombre;
+			$ruta = $this -> parsear_ruta_almacenamiento($idusu, $atras) . $nuevo_nombre;
 
 			if(copy($ruta_temporal, $atras . ALMACENAMIENTO . $ruta)){
 				unlink($ruta_temporal);
-				$idane[] = $this -> insertar('anexo',$campos,array($hoy,$estado,"'" . $nombre . "'",$tamano,"'" . $extension . "'","'" . $ruta . "'"));
+				$idanexo = $this -> insertar('anexo',$campos,array($hoy,$estado,"'" . $nombre . "'",$tamano,"'" . $extension . "'","'" . $ruta . "'"));
+				$idane[] = $idanexo;
+
+				$camposAneUsu = array('fk_idane', 'fk_idusu');
+				$this -> insertar('anexo_usuario',$camposAneUsu, array($idanexo,$idusu));
 			}
 		}
 
 		return(implode(",", $idane));
+	}
+	public function eliminar_anexo_usuario($idane){
+		$tabla = "anexo";
+		$valor[] = "estado='0'";
+		$condicion = "idane=" . $idane;
+
+		$this -> modificar($tabla,$valor,$condicion,$idane);
+
+		return(true);
 	}
 	public function crear_carpetas($destino){
 		$arreglo=explode("/",$destino);
