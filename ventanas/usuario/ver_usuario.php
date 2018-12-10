@@ -39,6 +39,7 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 		$('html, body').animate({scrollTop:0}, 'slow');
 		$('#usuario_view').validate();
 		$('#mensualidad').validate();
+		$("#formulario_control_medida").validate();
 
 		$('#anexar_imagen').click(function(){
 			$("#imagen_usuario").click();
@@ -210,6 +211,47 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 			
 		});
 
+		$("#registrar_medida").click(function(){
+			var formulario = $("#formulario_control_medida");
+			var validar = formulario.valid();
+			if(!validar){
+				return false;
+			}
+
+			if(!($("#valor_medida").val().length > 3)){
+				notificacion('Ingrese los decimales al valor de medida','warning',4000);
+				return false;
+			}
+
+			var fecha = $("#fecha").val();
+			var fecha_array = fecha.split("-");
+			var nueva_fecha = fecha_array[0] + "-" + fecha_array[1];
+			$("#fecha_mensualidad").val(nueva_fecha);
+			
+			var data = $(formulario).serializeArray(); // convert form to array
+			data.push({name: "ejecutar", value: 'registrar_medida'});
+			data.push({name: "fk_idusu", value: '<?php echo($idusuario); ?>'});
+
+			$.ajax({
+				url: 'ejecutar_acciones.php',
+				type: 'POST',
+				dataType: 'json',
+				async: false,
+				data: $.param(data),
+				success : function(respuesta){
+					if(respuesta.exito){
+						notificacion(respuesta.mensaje,'success',4000);
+					} else {
+						notificacion(respuesta.mensaje,'warning',4000);
+					}
+				}
+			});
+		});
+
+		$("#ver_graficos").click(function(){
+			window.open('<?php echo($atras); ?>ventanas/graficos/generar_grafico.php?idusuario=<?php echo($idusuario); ?>','_self');
+		});
+
 		$("#tipo").change(function(){
 			var tipo = $(this).val();
 			if(tipo == 2){//
@@ -337,8 +379,28 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 				</ul>
 			</div>
 		</div>
+
+		<div id="capa_informacion_usuario" class="">
+			<div class="card card-small mb-4">
+				<div class="card-header border-bottom">
+					<h6 class="m-0"><b>Anexos</b></h6>
+				</div>
+
+				<div class="card-body border-bottom text-center">
+					<form id="anexos_usuario" name="anexos_usuario" method="post" enctype="multipart/form-data">
+							<button type="button" class="btn btn-outline-success" id="anexar">Anexar</button>
+							<input type="file" name="anexos" id="anexos" style="display:none">
+					</form>
+				</div>
+
+				<div id="li_anexos" class="card-body">
+
+				</div>
+			</div>
+		</div>
+
 	</div>
-	<div class="col-lg-5">
+	<div class="col-lg-4">
 		<div class="card card-small mb-4">
 			<div class="card-header border-bottom">
 		    	<h6 class="m-0">Informaci&oacute;n de usuario</h6>
@@ -401,13 +463,68 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 				</form>
 			</div>
 		</div>
+
+		<div class="card card-small mb-4">
+			<?php
+			$fechai = date('Y-m-d');
+			$fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
+			?>
+
+			<div class="card-header border-bottom">
+				<h6 class="m-0"><b>Control de medidas</b></h6>
+			</div>
+
+			<div class="card-body border-bottom text-center">
+				<form id="formulario_control_medida" name="formulario_control_medida" method="post" enctype="multipart/form-data">
+					<div class="row">
+						<div class="form-group col-6">
+			                <label>Medida corporal*</label>
+			                <select class="form-control required" id="medida_corporal" name="medida_corporal">
+			                	<option value="">Medida corporal</option>
+								<?php 
+								$opciones_medir = $conexion -> obtener_opciones_campo('medir');
+								$opciones_medir_elemento = array();
+								
+								for ($i=0; $i < $opciones_medir["cant_resultados"]; $i++) { 
+									$opciones_medir_elemento[] = '<option value="' . $opciones_medir[$i]["id"] . '">' . $opciones_medir[$i]["nombre"] . '</option>';
+								}
+								echo(implode("",$opciones_medir_elemento));
+								?>
+			                </select>
+			            </div>
+
+			            <div class="form-group col-6">
+				        	<label class="">Fecha</label>
+				        	<div class="input-group" id="capa_fecha">
+					    		<input type="text" class="form-control date" name="fecha" id="fecha" readonly="" value="<?php echo($fechai); ?>">
+					    		<div class="input-group-append" id="ejecutar_fecha">
+									<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+								</div>
+					    	</div>
+					    </div>
+
+			            <div class="form-group col-12">
+							<label class="">Medida*</label>
+							<input type="text" id="valor_medida" name="valor_medida" class="form-control required" placeholder="1.55" value="" maxlength="5">
+						</div>
+
+
+						<input type="hidden" name="fecha_mensualidad" id="fecha_mensualidad" value="">
+
+						<div class="form-group col-6 text-left">
+							<button type="button" id="registrar_medida" class="btn btn-outline-success">Registrar</button>
+						</div>
+						<div class="form-group col-6 text-right">
+							<button type="button" id="ver_graficos" class="btn btn-outline-success">Ver gr&aacute;ficos</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	
 	</div>
 	
-	<div class="col-lg-3">
-		<?php
-		$fechai = date('Y-m-d');
-		$fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
-		?>
+	<div class="col-lg-4">
 		<div class="card card-small mb-4">
 			<div class="card-header border-bottom">
 				<h6 class="m-0"><b>Mensualidad</b></h6>
@@ -443,45 +560,61 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 				</form>
 				     
 			    <script type="text/javascript">
-		            $('#fechai').datepicker({
-		            	language : 'es',
-		           		format: 'yyyy-mm-dd',
-		           		autoclose: true,
-		           		setEndDate: new Date(<?php echo($fechaf); ?>)
-					}).on('changeDate',function(event){
-						var dia_mas = new Date(event.date);
-						var fechaf = new Date(event.date);
+			    	$(document).ready(function() {
+			    		$("#valor").keyup(function(){
+				            var valor=$(this).val().replace(/[^0-9]/g, '');
+				            $(this).val(Moneda_r(valor));
+				        });
 
-						var nueva_fecha2 = dia_mas.setDate(dia_mas.getDate() + 1);
-						var fecha_formateada2 = $.format.date(nueva_fecha2, "yyyy-MM-dd");
-						$('#fechaf').datepicker('setStartDate', new Date(fecha_formateada2));
+			    		$("#valor_medida").keyup(function(){
+				            var valor=$(this).val().replace(/[^0-9]/g, '');
+				            $(this).val(Medida_r(valor));
+				        });
 
-						var nueva_fecha = fechaf.setMonth(fechaf.getMonth() + 1);
-						nueva_fecha = fechaf.setDate(fechaf.getDate());
-						var fecha_formateada = $.format.date(nueva_fecha, "yyyy-MM-dd");
-						$("#fechaf").val(fecha_formateada);
-					});
-					$('#fechaf').datepicker({
-		            	language : 'es',
-		           		format: 'yyyy-mm-dd',
-		           		autoclose: true,
-		           		setStartDate : new Date(<?php echo($fechai); ?>)
-					}).on('changeDate', function(event){
-						var endDate = new Date(event.date.valueOf());
-						$('#fechai').datepicker('setEndDate', endDate);
-					});
+				        $('#fechai').datepicker({
+			            	language : 'es',
+			           		format: 'yyyy-mm-dd',
+			           		autoclose: true,
+			           		setEndDate: new Date(<?php echo($fechaf); ?>)
+						}).on('changeDate',function(event){
+							var dia_mas = new Date(event.date);
+							var fechaf = new Date(event.date);
 
-		            $("#ejecutar_fechai").click(function(){
-		            	$("#fechai").datepicker('show');
-		            });
-		            $("#ejecutar_fechaf").click(function(){
-		            	$("#fechaf").datepicker('show');
-		            });
+							var nueva_fecha2 = dia_mas.setDate(dia_mas.getDate() + 1);
+							var fecha_formateada2 = $.format.date(nueva_fecha2, "yyyy-MM-dd");
+							$('#fechaf').datepicker('setStartDate', new Date(fecha_formateada2));
 
-		            $("#valor").keyup(function(){
-			            var valor=$(this).val().replace(/[^0-9]/g, '');
-			            $(this).val(Moneda_r(valor));
-			        });
+							var nueva_fecha = fechaf.setMonth(fechaf.getMonth() + 1);
+							nueva_fecha = fechaf.setDate(fechaf.getDate());
+							var fecha_formateada = $.format.date(nueva_fecha, "yyyy-MM-dd");
+							$("#fechaf").val(fecha_formateada);
+						});
+						$('#fechaf').datepicker({
+			            	language : 'es',
+			           		format: 'yyyy-mm-dd',
+			           		autoclose: true,
+			           		setStartDate : new Date(<?php echo($fechai); ?>)
+						}).on('changeDate', function(event){
+							var endDate = new Date(event.date.valueOf());
+							$('#fechai').datepicker('setEndDate', endDate);
+						});
+
+						$('#fecha').datepicker({
+			            	language : 'es',
+			           		format: 'yyyy-mm-dd',
+			           		autoclose: true
+						});
+
+			            $("#ejecutar_fechai").click(function(){
+			            	$("#fechai").datepicker('show');
+			            });
+			            $("#ejecutar_fechaf").click(function(){
+			            	$("#fechaf").datepicker('show');
+			            });
+			            $("#ejecutar_fecha").click(function(){
+			            	$("#fecha").datepicker('show');
+			            });
+			    	});
 
 		            function Moneda_r(valor){
 			            var num = valor.replace(/\./g,'');
@@ -491,26 +624,16 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 			                return(num);
 			            }
 			        }
+
+			        function Medida_r(valor){
+			            var num = valor.replace(/\./g,'');
+			            if(!isNaN(num)){
+			                 num = num.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{2})/g,'$1.');
+			                num = num.split('').reverse().join('').replace(/^[\.]/,'');
+			                return(num);
+			            }
+			        }
 			    </script>
-			</div>
-		</div>
-	</div>
-
-	<div id="capa_informacion_usuario" class="col-lg-4">
-		<div class="card card-small mb-4">
-			<div class="card-header border-bottom">
-				<h6 class="m-0"><b>Anexos</b></h6>
-			</div>
-
-			<div class="card-body border-bottom text-center">
-				<form id="anexos_usuario" name="anexos_usuario" method="post" enctype="multipart/form-data">
-						<button type="button" class="btn btn-outline-success" id="anexar">Anexar</button>
-						<input type="file" name="anexos" id="anexos" style="display:none">
-				</form>
-			</div>
-
-			<div id="li_anexos" class="card-body">
-
 			</div>
 		</div>
 	</div>

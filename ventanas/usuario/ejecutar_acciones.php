@@ -273,6 +273,43 @@ function eliminar_anexo(){
 
 	echo(json_encode($retorno));
 }
+function registrar_medida(){
+	global $conexion, $atras;
+	$retorno = array();
+	$hoy = date('Y-m-d');
+	
+	$consulta = "select count(*) as cantidad from medida where fk_idusu=" . @$_REQUEST["fk_idusu"] . " and fecha_mensualidad='" . @$_REQUEST["fecha_mensualidad"] . "' and medida_corporal=" . @$_REQUEST["medida_corporal"];
+	$existencia_medida = $conexion -> listar_datos($consulta);
+	
+	if($existencia_medida[0]["cantidad"]){//Medida ya registrada
+		$retorno["mensaje"] = "Medida ya registrada en este mes";
+		$retorno["exito"] = 0;
+		echo(json_encode($retorno));
+		die();
+	}
+	unset($_REQUEST["ejecutar"]);
+	
+	foreach($_REQUEST as $llave => $val){
+		if($llave == 'fecha'){
+			$campos[] = $llave;
+			$valores[] = "date_format('" . $val . "', '%Y-%m-%d')";
+		} else {
+			$campos[] = $llave;
+			$valores[] = "'" . $val . "'";
+		}
+	}	
+	
+	$resultado = $conexion -> insertar('medida',$campos,$valores);
+	if($resultado){
+		$retorno["mensaje"] = "Medida registrada!";
+		$retorno["exito"] = 1;
+		$retorno["idusu"] = $resultado;
+	}else{
+		$retorno["exito"] = 0;
+		$retorno["mensaje"] = "Problemas en la inserci&oacute;n";
+	}
+	echo(json_encode($retorno));
+}
 
 if(@$_REQUEST["ejecutar"]){
 	$_REQUEST["ejecutar"]();

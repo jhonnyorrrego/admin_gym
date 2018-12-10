@@ -100,6 +100,28 @@ class lib_gym{
 			return(false);
 		}
 	}
+	/*
+	Funcion encargada en obtener opciones de listas desplegables de campos que esten en formatos
+
+	$campo = Nombre de las opciones a obtener
+
+	Retorna matriz con las opciones del campo.
+	*/
+	public function obtener_opciones_campo($campo){
+		$retorno = array();
+		switch ($campo) {
+			case 'medir':
+				$consulta = "select a.idmed_cor as id, a.etiqueta as nombre from medida_corporal a where a.estado=1";
+				$retorno = $this -> listar_datos($consulta);
+				break;
+			
+			default:
+				# code...
+				break;
+		}
+
+		return($retorno);
+	}
 	public function ingreso_usuario($idusu){
 		$hoy = date('Y-m-d');
 		$retorno = array();
@@ -329,6 +351,44 @@ class lib_gym{
 		return($cadena);
 	}
 	/*
+	procesar_filtro_grafico
+	funcion encargada de recibir arreglo con filtros y retornar los datos necesarios para generar grafico
+	*/
+	public function procesar_filtro_medida_grafico($datos){
+		$where = array();
+		if(@$datos["fk_idusu"]){
+			$where[] = "a.fk_idusu=" . $datos["fk_idusu"];
+		}
+		if(@$datos["fechai"] && @$datos["fechaf"]){
+			$where[] = "(date_format(a.fecha, '%Y-%m-%d')>='" . $datos["fechai"] . "' and date_format(a.fecha, '%Y-%m-%d')<='" . $datos["fechaf"] . "')";
+		}
+		if(@$datos["medida_corporal"]){
+			$where[] = "a.medida_corporal=" . $datos["medida_corporal"];
+		}
+
+		$consulta1 = "select a.fecha, a.valor_medida from medida a where " . implode(" and " , $where) . " group by a.fecha, a.valor_medida";
+		$datos = $this -> listar_datos($consulta1);
+
+		return($datos);
+	}
+	public function obtener_filtro_medida_grafico($datos){
+		$where = array();
+		if(@$datos["fk_idusu"]){
+			$where[] = "a.fk_idusu=" . $datos["fk_idusu"];
+		}
+		if(@$datos["fechai"] && @$datos["fechaf"]){
+			$where[] = "(date_format(a.fecha, '%Y-%m-%d')>='" . $datos["fechai"] . "' and date_format(a.fecha, '%Y-%m-%d')<='" . $datos["fechaf"] . "')";
+		}
+		if(@$datos["medida_corporal"]){
+			$where[] = "a.medida_corporal=" . $datos["medida_corporal"];
+		}
+
+		$consulta1 = "select b.idmed_cor as id, b.etiqueta as nombre from medida a, medida_corporal b where a.medida_corporal=b.idmed_cor and " . implode(" and " , $where) . " group by b.idmed_cor, b.etiqueta";
+		$datos = $this -> listar_datos($consulta1);
+
+		return($datos);
+	}
+	/*
 	sumar_fecha
 	funcion encargada de sumar o restar a una fecha x dias
 	retorna la nueva fecha
@@ -346,6 +406,34 @@ class lib_gym{
 			$date2 = strtotime($fechaf);
 		}
 		return floor(($date1 - $date2) / 60 / 60 / 24);
+	}
+	public function mes($mes) {
+		switch($mes) {
+			case 1:
+				return "enero";
+			case 2:
+				return "febrero";
+			case 3:
+				return "marzo";
+			case 4:
+				return "abril";
+			case 5:
+				return "mayo";
+			case 6:
+				return "junio";
+			case 7:
+				return "julio";
+			case 8:
+				return "agosto";
+			case 9:
+				return "septiembre";
+			case 10:
+				return "octubre";
+			case 11:
+				return "noviembre";
+			case 12:
+				return "diciembre";
+		}
 	}
 	public function iniciar_variables_sesiones($datos){
 		$_SESSION["usuario" . LLAVE_SESION] = $datos[0]["identificacion"];

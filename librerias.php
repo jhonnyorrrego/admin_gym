@@ -102,6 +102,12 @@ function date_format_jquery(){
 	$texto='<script src="' . $raiz . 'js/jquery-dateformat.js"></script>';
 	return($texto);
 }
+function chart(){
+	global $raiz;
+	$texto='<script src="' . $raiz . 'js/Chart.bundle.js"></script>';
+
+	return($texto);
+}
 function tema_dashboard_lite(){
 	global $raiz;
 	include_once($raiz . "template/dashboard-lite/funciones_tema.php");
@@ -112,7 +118,7 @@ function tema_dashboard_lite(){
 	$texto.='<script src="' . $raiz . 'vendor/components/jquery/jquery.js"></script>';
 	$texto.='<script src="' . $raiz . 'template/dashboard-lite/externs/popper.min.js"></script>';
 	$texto.='<script src="' . $raiz . 'vendor/twbs/bootstrap/dist/js/bootstrap.js"></script>';
-	$texto.='<script src="' . $raiz . 'js/Chart.js"></script>';
+	$texto.= chart();
 	$texto.='<script src="' . $raiz . 'template/dashboard-lite/externs/shards.min.js"></script>';
 	$texto.='<script src="' . $raiz . 'template/dashboard-lite/externs/jquery.sharrre.min.js"></script>';
 	$texto.='<script src="' . $raiz . 'template/dashboard-lite/scripts/extras.1.1.0.min.js"></script>';
