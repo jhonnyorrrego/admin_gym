@@ -191,6 +191,18 @@ function agregar_mensualidad(){
 	$tabla = 'mensualidad';
 	$condicion_update = "idusu=" . $id;
 
+	//validacion fecha inicial no puede ser menor a una fecha final almacenada
+	$consulta1 = "select count(*) as cant from mensualidad where estado=1 and date_format(fechaf, '%Y-%m-%d')>'" . $fechai . "' and idusu=" . $id;
+	$datosValidacion = $conexion -> listar_datos($consulta1);
+
+	if($datosValidacion[0]["cant"]){
+		$retorno["exito"] = 0;
+		$retorno["mensaje"] = "Mensualidad asignada no disponible, intente aumentar la fecha inicial";
+
+		echo(json_encode($retorno));
+		return(true);
+	}
+
 	//Parseando arreglo para insertar
 	$campos_insertar = array('fechai','fechaf','valor','idusu','estado');
 	$valores_insertar = array();
@@ -213,10 +225,6 @@ function agregar_mensualidad(){
 	if($resultado){
 		$retorno["mensaje"] = "Mensualidad asignada!";
 		$retorno["exito"] = 1;
-		$retorno["info_mensualidad"] = $conexion -> obtener_texto_mensualidad($id);
-		$retorno["info_estado"] = $conexion -> obtener_texto_estado_usuario($id);
-		$retorno["info_valor"] = $conexion -> obtener_texto_valor($id);
-		$retorno["info_dias_faltantes"] = $conexion -> obtener_dias_faltantes($id);
 	}else{
 		$retorno["exito"] = 0;
 		$retorno["mensaje"] = "Problemas en la inserci&oacute;n";
@@ -308,6 +316,49 @@ function registrar_medida(){
 		$retorno["exito"] = 0;
 		$retorno["mensaje"] = "Problemas en la inserci&oacute;n";
 	}
+	echo(json_encode($retorno));
+}
+function botones_usuario(){
+	global $conexion, $atras;
+	$retorno = array();
+	$idusuario = @$_REQUEST["idusu"];
+
+	$cadena = '<span class="d-flex mb-2">
+	              <i class="fas fa-flag mr-1"></i>
+	              <strong class="mr-1"> Estado:</strong>
+	              <div id="info_estado">' . $conexion -> obtener_texto_estado_usuario($idusuario) . '</div>
+	            </span>
+	            <span class="d-flex mb-2">
+	            	<i class="far fa-calendar-alt mr-1"></i>
+	              	<strong class="mr-1"> Mensualidad:</strong>
+	              	<div id="info_mensualidad">' . $conexion -> obtener_texto_mensualidad($idusuario) . '</div>
+	            </span>
+	            <span class="d-flex mb-2">
+	            	<i class="fas fa-dollar-sign mr-1"></i>
+	              	<strong class="mr-1"> Valor:</strong>
+	              	<div id="info_valor">' . $conexion -> obtener_texto_valor($idusuario) . '</div>
+	            </span>
+	            <span class="d-flex mb-2">
+	            	<i class="far fa-clock mr-1"></i>
+	            	<strong class="mr-1"> D&iacute;as faltantes:</strong>
+	            	<div id="info_dias_faltantes">' . $conexion -> obtener_dias_faltantes($idusuario) . '</div>
+	            </span>';
+
+	$retorno["exito"] = 1;
+	$retorno["html"] = $cadena;
+
+	echo(json_encode($retorno));
+}
+function eliminar_mensualidad(){
+	global $conexion, $atras;
+	$retorno = array();
+	$idusuario = @$_REQUEST["idusu"];
+
+	$conexion -> eliminar_mensualidad_usuario($idusuario);
+
+	$retorno["exito"] = 1;
+	$retorno["mensaje"] = "Acci&oacute;n realizada";
+
 	echo(json_encode($retorno));
 }
 

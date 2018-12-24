@@ -11,7 +11,7 @@ echo(notificacion());
 
 echo(bootstrap_table());
 
-$alto_tabla = "alto_documento-300";
+$alto_tabla = "alto_documento-330";
 if (@$_SESSION["dispositivo"] == 'phone') {
 	$alto_tabla = "alto_documento+330";
 }
@@ -21,6 +21,9 @@ if (@$_SESSION["dispositivo"] == 'phone') {
 <style>
 .table {
   background-color: white;
+}
+table,th,td{
+	font-size:10pt;
 }
 </style>
 <script>
@@ -45,6 +48,33 @@ $(document).ready(function(){
 			</div>
 			<div class="card-body">
 				<form class="text-center" id="form_table" name="form_table">
+
+					<div class="row mb-2">
+						<div class="col-md-2">
+							<input class="form-control buscar" name="buscar" id="buscar" type="text" placeholder="Buscar">
+						</div>
+						<!--div class="col-md-2">
+							<label class="checkbox-inline">
+								<input type="checkbox" class="filtro_check" name="vencidos" value="1"> Vencidos
+							</label>
+						</div>
+						<div class="col-md-2">
+							<label class="checkbox-inline">
+								<input type="checkbox" class="filtro_check" name="por_vencerse" value="1"> Por vencerse
+							</label>
+						</div-->
+						<fieldset class="">
+					    	<div class="custom-control custom-checkbox mb-1">
+					        	<input type="checkbox" class="custom-control-input filtro_check" name="vencidos[]" value="1">
+					          	<label class="custom-control-label" for="formsCheckboxDefault">Vencidos</label>
+					        </div>
+					        <div class="custom-control custom-checkbox mb-1">
+					        	<input type="checkbox" class="custom-control-input filtro_check" name="por_vencerse[]" value="1">
+					          	<label class="custom-control-label" for="formsCheckboxDefault">Por vencerse</label>
+					        </div>
+					    </fieldset>
+					</div>
+
 					<div class="card-body p-0 pb-3 text-center">
 						<table id="table" class="table mb-0">
 							<thead class="bg-light">
@@ -56,6 +86,9 @@ $(document).ready(function(){
 									<th data-field="celular" data-sortable="true" data-visible="true">Celular</th>
 									<th data-field="tipo_usuario_funcion" data-sortable="false" data-visible="true">Tipo de usuario</th>
 									<th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
+									<th data-field="x_fechai" data-sortable="true" data-visible="true">Fecha inicial</th>
+									<th data-field="x_fechaf" data-sortable="true" data-visible="true">Fecha final</th>
+									<th data-field="dias_faltantes" data-sortable="false" data-visible="true">Dias faltantes</th>
 									<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
 								</tr>
 							</thead>
@@ -72,6 +105,23 @@ $(document).ready(function(){
 	
 		
 <form class="text-center" id="form_table" name="form_table">
+
+	<div class="row mb-2">
+		<div class="col-md-2 text-left mb-2">
+			<input class="form-control buscar" name="buscar" id="buscar" type="text" placeholder="Buscar">
+		</div>
+		<div class="col-md-4 text-left mb-2">
+			<label class="checkbox-inline">
+				<input type="checkbox" class="filtro_check" name="vencidos" value="1"> Vencidos
+			</label>
+		</div>
+		<div class="col-md-2 text-left mb-2">
+			<label class="checkbox-inline">
+				<input type="checkbox" class="filtro_check" name="por_vencerse" value="1"> Por vencerse
+			</label>
+		</div>
+	</div>
+
 	<table id="table" class="table" style="width: 100%">
 		<thead class="">
 			<tr>
@@ -82,6 +132,9 @@ $(document).ready(function(){
 				<th data-field="celular" data-sortable="true" data-visible="true">Celular</th>
 				<th data-field="tipo_usuario_funcion" data-sortable="false" data-visible="true">Tipo de usuario</th>
 				<th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
+				<th data-field="x_fechai" data-sortable="false" data-visible="true">Fecha inicial</th>
+				<th data-field="x_fechaf" data-sortable="false" data-visible="true">Fecha final</th>
+				<th data-field="dias_faltantes" data-sortable="false" data-visible="true">Dias faltantes</th>
 				<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
 			</tr>
 		</thead>
@@ -115,7 +168,7 @@ $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del d
 		clickToSelect: false,
 		sidePagination: 'server',
 		pageSize: cantidad_registros,
-		search: true,
+		search: false,
 		cardView:false,
 		pageList:'All',
 		paginationVAlign: 'bottom',
@@ -134,13 +187,13 @@ $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del d
 		clickToSelect: false,
 		sidePagination: 'server',
 		pageSize: cantidad_registros,
-		search: true,
+		search: false,
 		searchAlign: 'left',
 		cardView:true,
 		pageList:'All',
 		paginationVAlign: 'bottom',
 		paginationHAlign: 'left',
-		height: 2050
+		height: 2290
 	});
 	<?php } ?>
 	
@@ -167,13 +220,13 @@ function procesamiento_listar(){
 	$('#table').bootstrapTable('refreshOptions', {
 		url: 'obtener_usuarios.php',
 		queryParams: function (params) {
-			console.log(params);
+			
 			var q = {
 				"rows": cantidad_registros,
 				"numfilas":cantidad_registros,
 				"actual_row": params.offset,
 				"pagina":(params.offset/cantidad_registros)+1,
-				"search": params.search,
+				//"search": params.search,
 				"sort": params.sort,
 				"order": params.order
 			};
@@ -212,6 +265,15 @@ $.fn.serializeObject = function(){
     });
     return o;
 };
+
+$(document).ready(function(){
+	$(".buscar").keyup(function () {
+	    procesamiento_listar();
+	});
+	$(".filtro_check").click(function(){
+		procesamiento_listar();
+	});
+});
 </script>
 <?php
 include_once($atras . "ventanas/usuario/librerias_reporte_usuarios_js.php");

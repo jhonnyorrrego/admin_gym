@@ -197,10 +197,7 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 				success : function(respuesta){
 					if(respuesta.exito){
 						notificacion(respuesta.mensaje,'success',4000);
-						$("#info_mensualidad").html(respuesta.info_mensualidad);
-						$("#info_estado").html(respuesta.info_estado);
-						$("#info_valor").html(respuesta.info_valor);
-						$("#info_dias_faltantes").html(respuesta.info_dias_faltantes);
+						botones_usuario();
 						
 						$('html, body').animate({ scrollTop: $('#capa_informacion_usuario').offset().top -80 }, 'slow');
 					} else {
@@ -293,23 +290,63 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 				}
 	 		});
 	 	});
+
+	 	$("#eliminar_mensualidad").click(function(){
+	 		if(!confirm('Está seguro de eliminar la mensualidad?')){
+				return false;
+			}
+
+			var x_idusu = '<?php echo($idusuario); ?>';
+	 		$.ajax({
+	 			url: 'ejecutar_acciones.php',
+	 			type: 'POST',
+				dataType: 'json',
+				async: false,
+				data: {ejecutar: 'eliminar_mensualidad', idusu : x_idusu},
+				success : function(respuesta){
+					if(respuesta.exito){
+						notificacion(respuesta.mensaje,'success',4000);
+						botones_usuario();
+					} else {
+						notificacion(respuesta.mensaje,'warning',4000);
+					}
+				}
+	 		});
+	 	});
 	});
+
+	function botones_usuario(){
+		var x_idusu = '<?php echo($idusuario); ?>';
+		$.ajax({
+ 			url: 'ejecutar_acciones.php',
+ 			type: 'POST',
+			dataType: 'json',
+			data: {ejecutar: 'botones_usuario', idusu : x_idusu},
+			success : function(respuesta){
+				if(respuesta.exito){
+					$("#botones_usuario").html(respuesta.html);
+				} else {
+					$("#botones_usuario").html("");
+				}
+			}
+ 		});
+	}
 
 	function listar_anexos(){
 		var x_idusu = '<?php echo($idusuario); ?>';
 		$.ajax({
-	 			url: 'ejecutar_acciones.php',
-	 			type: 'POST',
-				dataType: 'json',
-				data: {ejecutar: 'listar_anexos', idusu : x_idusu},
-				success : function(respuesta){
-					if(respuesta.exito){
-						$("#li_anexos").html(respuesta.lista_anexos);
-					} else {
-						$("#li_anexos").html("");
-					}
+ 			url: 'ejecutar_acciones.php',
+ 			type: 'POST',
+			dataType: 'json',
+			data: {ejecutar: 'listar_anexos', idusu : x_idusu},
+			success : function(respuesta){
+				if(respuesta.exito){
+					$("#li_anexos").html(respuesta.lista_anexos);
+				} else {
+					$("#li_anexos").html("");
 				}
-	 		});
+			}
+ 		});
 	}
 	</script>
 
@@ -338,7 +375,7 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
                       		<i class="fas fa-check-circle mr-1"></i>Ingresar
                   		</button>
 					</li>
-					<li class="list-group-item p-3">
+					<li class="list-group-item p-3" id="botones_usuario">
 						<span class="d-flex mb-2">
                           <i class="fas fa-flag mr-1"></i>
                           <strong class="mr-1"> Estado:</strong>
@@ -375,6 +412,11 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 								?>
                         	</div>
                         </span>
+					</li>
+					<li class="list-group-item p-3 text-center">
+						<button type="button" class="mb-2 btn btn-sm btn-pill btn-outline-danger mr-2" id="eliminar_mensualidad">
+                      		<i class="fas fa-check-circle mr-1"></i>Eliminar mensualidad
+                  		</button>
 					</li>
 				</ul>
 			</div>

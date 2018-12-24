@@ -20,9 +20,15 @@ function estado_funcion($estado){
 function acciones_usuario($idusu){
 	global $conexion, $raiz;
 	$cadena = "";
-	$cadena .= "<button class='btn btn-light ver_usuario' idusuario='" . $idusu . "' id='usuario_" . $idusu . "'><i class='fas fa-address-card'></i></button>";
-	$cadena .= "<button class='btn btn-light ver_grafico' idusuario='" . $idusu . "' id='usuario_" . $idusu . "'><i class='fas fa-chart-bar'></i></button>";
+	$cadena .= "<button class='btn btn-light ver_usuario' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Ficha'><i class='fas fa-address-card'></i></button>";
+	$cadena .= "<button class='btn btn-light ver_grafico' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Estadisticas'><i class='fas fa-chart-bar'></i></button>";
+	$cadena .= "<button class='btn btn-light ingresar_usuario' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Ingresar'><i class='fas fa-door-open'></i></button>";
 	return($cadena);
 }
+function dias_faltantes_usuarios($idusu){
+	global $conexion, $raiz;
+	$cadena = $conexion -> obtener_dias_faltantes($idusu);
 
+	return($cadena);
+}
 ?>

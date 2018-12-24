@@ -307,7 +307,7 @@ class lib_gym{
 	Funcion encargada de retornar el valor de la ultima mensualidad asignada
 	*/
 	public function obtener_texto_valor($idusu){
-		$consulta = "select a.valor from mensualidad a where a.idusu=" . $idusu . " order by idmen desc";
+		$consulta = "select a.valor from usuario a where a.idusu=" . $idusu;
 		$datos = $this -> listar_datos($consulta,0,1);
 
 		$valor = 0;
@@ -327,6 +327,36 @@ class lib_gym{
 		$datos = $this -> listar_datos($consulta);
 
 		return(@$datos[0]["cantidad"]);
+	}
+	public function eliminar_mensualidad_usuario($idusu){
+		$sql1 = "update usuario set fechai=null, fechaf=null, valor=null where idusu=" . $idusu;
+
+		$condicion1 = "";
+		$condicion2 = "";
+
+		$valores = array();
+		$valores2 = array();
+
+		$valores[] = 'fechai=null';
+		$valores[] = 'fechaf=null';
+		$valores[] = 'valor=null';
+
+		$condicion1 = "idusu=" . $idusu;
+
+		$this -> modificar('usuario',$valores,$condicion1,$idusu);
+
+		$consultarHistorico = "select idmen from mensualidad where idusu=" . $idusu . " order by idmen desc";
+		$datosUsuario = $this -> listar_datos($consultarHistorico,0,1);
+
+		if($datosUsuario["cant_resultados"]){
+			$valores2[] = 'estado=0';
+
+			$condicion2 = "idmen=" . $datosUsuario[0]["idmen"];
+
+			$this -> modificar('mensualidad', $valores2, $condicion2, $datosUsuario[0]["idmen"]);
+		}
+
+		return(true);
 	}
 	public function obtener_dias_faltantes($idusu){
 		$datos = $this -> obtener_datos_usuario($idusu);
