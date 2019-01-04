@@ -29,12 +29,12 @@ function encabezado(){
           </div>
           <div class="nav-wrapper">
             <ul class="nav flex-column">
-              <li class="nav-item">
+              <!--li class="nav-item">
                 <a id="enlace_ingreso" class="nav-link" href="<?php echo($atras); ?>ventanas/ingreso/ingreso.php">
                   <i class="fas fa-home"></i>
                   <span>Ingreso</span>
                 </a>
-              </li>
+              </li-->
               <li class="nav-item">
 
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -114,7 +114,7 @@ function encabezado(){
                   </div>
                 </li>
                 <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle text-nowrap px-3" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                  <a class="nav-link dropdown-toggle text-nowrap px-3 datos_sesion" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
                     <img class="user-avatar rounded-circle mr-2" src="<?php echo($atras . @$_SESSION["img"]); ?>" alt="User Avatar">
                     <span class="d-none d-md-inline-block"><?php echo(@$_SESSION["nombres"] . " " .@$_SESSION["apellidos"]); ?></span>
                   </a>
@@ -143,7 +143,7 @@ function encabezado(){
 	<?php
 }
 function pie(){
-	$atras = "../../";
+	global $atras;
 	?>
 		  </div>
 		</main>
@@ -152,5 +152,25 @@ function pie(){
   </body>
 </html>
 	<?php
+}
+function funciones_js_tema(){
+  global $atras;
+  ?>
+<script>
+function actualizar_informacion_sesion(){
+    $.ajax({
+        url : '<?php echo($atras); ?>ventanas/usuario/ejecutar_acciones.php',
+        type : 'POST',
+        dataType: 'json',
+        data: {ejecutar: 'obtener_informacion_sesion'},
+        success : function(resultado){
+            if(resultado.exito){
+                $(".datos_sesion").html(resultado.datos_sesion);
+            }
+        }
+    });
+}
+</script>
+  <?php
 }
 ?>

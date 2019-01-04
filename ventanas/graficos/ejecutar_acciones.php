@@ -27,8 +27,8 @@ function obtener_json_datos(){
 
 	if($data["cant_resultados"]){
 		for ($i=0; $i < $data["cant_resultados"]; $i++) { 
-			$mes = explode("-" , $data[$i]["fecha"]);
-			$nuevoArreglo[$i]["etiquetas"] = $mes[0] . " " . substr($conexion -> mes($mes[1]),0,3);
+			$fechaArray = explode("-" , $data[$i]["fecha"]);
+			$nuevoArreglo[$i]["etiquetas"] = $fechaArray[2] . " " . substr($conexion -> mes($fechaArray[1]),0,3) . " " . substr($fechaArray[0],-2);
 			$nuevoArreglo[$i]["valores"] = $data[$i]["valor_medida"];
 		}
 	}

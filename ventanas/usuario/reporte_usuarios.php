@@ -11,7 +11,7 @@ echo(notificacion());
 
 echo(bootstrap_table());
 
-$alto_tabla = "alto_documento-330";
+$alto_tabla = "alto_documento-350";
 if (@$_SESSION["dispositivo"] == 'phone') {
 	$alto_tabla = "alto_documento+330";
 }
@@ -64,12 +64,12 @@ $(document).ready(function(){
 							</label>
 						</div-->
 						<fieldset class="">
-					    	<div class="custom-control custom-checkbox mb-1">
-					        	<input type="checkbox" class="custom-control-input filtro_check" name="vencidos[]" value="1">
-					          	<label class="custom-control-label" for="formsCheckboxDefault">Vencidos</label>
+					    	<div class="custom-control custom-checkbox mb-1 text-left">
+					        	<input type="checkbox" class="custom-control-input filtro_check" name="vencidos" value="1" id="formsCheckboxChecked">
+					          	<label class="custom-control-label" for="formsCheckboxChecked">Vencidos</label>
 					        </div>
-					        <div class="custom-control custom-checkbox mb-1">
-					        	<input type="checkbox" class="custom-control-input filtro_check" name="por_vencerse[]" value="1">
+					        <div class="custom-control custom-checkbox mb-1 text-left">
+					        	<input type="checkbox" class="custom-control-input filtro_check" name="por_vencerse" value="1" id="formsCheckboxDefault">
 					          	<label class="custom-control-label" for="formsCheckboxDefault">Por vencerse</label>
 					        </div>
 					    </fieldset>
@@ -79,6 +79,7 @@ $(document).ready(function(){
 						<table id="table" class="table mb-0">
 							<thead class="bg-light">
 								<tr>
+									<th data-field="mostrar_foto_usuario" data-sortable="false" data-visible="true"></th>
 									<th data-field="identificacion" data-sortable="true" data-visible="true">Identificacion</th>
 									<th data-field="nombres" data-sortable="true" data-visible="true">Nombres</th>
 									<th data-field="apellidos" data-sortable="true" data-visible="true">Apellidos</th>
@@ -125,6 +126,7 @@ $(document).ready(function(){
 	<table id="table" class="table" style="width: 100%">
 		<thead class="">
 			<tr>
+				<th data-field="mostrar_foto_usuario" data-sortable="false" data-visible="true"></th>
 				<th data-field="identificacion" data-sortable="true" data-visible="true">Identificacion</th>
 				<th data-field="nombres" data-sortable="true" data-visible="true">Nombres</th>
 				<th data-field="apellidos" data-sortable="true" data-visible="true">Apellidos</th>
@@ -193,13 +195,13 @@ $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del d
 		pageList:'All',
 		paginationVAlign: 'bottom',
 		paginationHAlign: 'left',
-		height: 2290
+		height: 2650
 	});
 	<?php } ?>
 	
 	procesamiento_listar();
 });
-$(document).ready(function(){//Se aplica el alto a la tabla para que se adapte al momento de cambiar el temaño de la ventana.	
+$(document).ready(function(){
 	$("#form_table").submit(function(){
 		return false;
 	});
@@ -268,7 +270,9 @@ $.fn.serializeObject = function(){
 
 $(document).ready(function(){
 	$(".buscar").keyup(function () {
-	    procesamiento_listar();
+		setTimeout(function(){
+			procesamiento_listar();
+		}, 100);
 	});
 	$(".filtro_check").click(function(){
 		procesamiento_listar();

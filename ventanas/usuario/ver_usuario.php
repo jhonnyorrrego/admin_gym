@@ -22,8 +22,12 @@ $imagen_usuario = $conexion -> obtener_imagen_usuario($idusuario);
 if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 	$defecto = $atras . $imagen_usuario;
 }
+
+$fechai = date('Y-m-d');
+$fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 ?>
 <?php echo(encabezado());?>
+<?php echo(funciones_js_tema()); ?>
 
   	<style type="text/css">
   	.campo_editar{
@@ -147,6 +151,10 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 						if(respuesta.exito){
 							notificacion(respuesta.mensaje,'success',4000);
 							$("#info_estado").html(respuesta.info_estado);
+
+							<?php if($idusuario == @$_SESSION["idusu"]){ ?>
+							actualizar_informacion_sesion();//Actualiza la informacion de sesion
+							<?php } ?>
 						} else {
 							notificacion(respuesta.mensaje,'warning',4000);
 						}
@@ -415,32 +423,12 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 					</li>
 					<li class="list-group-item p-3 text-center">
 						<button type="button" class="mb-2 btn btn-sm btn-pill btn-outline-danger mr-2" id="eliminar_mensualidad">
-                      		<i class="fas fa-check-circle mr-1"></i>Eliminar mensualidad
+                      		<i class="fas fa-times-circle mr-1"></i>Eliminar mensualidad
                   		</button>
 					</li>
 				</ul>
 			</div>
 		</div>
-
-		<div id="capa_informacion_usuario" class="">
-			<div class="card card-small mb-4">
-				<div class="card-header border-bottom">
-					<h6 class="m-0"><b>Anexos</b></h6>
-				</div>
-
-				<div class="card-body border-bottom text-center">
-					<form id="anexos_usuario" name="anexos_usuario" method="post" enctype="multipart/form-data">
-							<button type="button" class="btn btn-outline-success" id="anexar">Anexar</button>
-							<input type="file" name="anexos" id="anexos" style="display:none">
-					</form>
-				</div>
-
-				<div id="li_anexos" class="card-body">
-
-				</div>
-			</div>
-		</div>
-
 	</div>
 	<div class="col-lg-4">
 		<div class="card card-small mb-4">
@@ -506,64 +494,24 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 			</div>
 		</div>
 
-		<div class="card card-small mb-4">
-			<?php
-			$fechai = date('Y-m-d');
-			$fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
-			?>
+		<div id="capa_informacion_usuario" class="">
+			<div class="card card-small mb-4">
+				<div class="card-header border-bottom">
+					<h6 class="m-0"><b>Anexos</b></h6>
+				</div>
 
-			<div class="card-header border-bottom">
-				<h6 class="m-0"><b>Control de medidas</b></h6>
-			</div>
+				<div class="card-body border-bottom text-center">
+					<form id="anexos_usuario" name="anexos_usuario" method="post" enctype="multipart/form-data">
+							<button type="button" class="btn btn-outline-success" id="anexar">Anexar</button>
+							<input type="file" name="anexos" id="anexos" style="display:none">
+					</form>
+				</div>
 
-			<div class="card-body border-bottom text-center">
-				<form id="formulario_control_medida" name="formulario_control_medida" method="post" enctype="multipart/form-data">
-					<div class="row">
-						<div class="form-group col-6">
-			                <label>Medida corporal*</label>
-			                <select class="form-control required" id="medida_corporal" name="medida_corporal">
-			                	<option value="">Medida corporal</option>
-								<?php 
-								$opciones_medir = $conexion -> obtener_opciones_campo('medir');
-								$opciones_medir_elemento = array();
-								
-								for ($i=0; $i < $opciones_medir["cant_resultados"]; $i++) { 
-									$opciones_medir_elemento[] = '<option value="' . $opciones_medir[$i]["id"] . '">' . $opciones_medir[$i]["nombre"] . '</option>';
-								}
-								echo(implode("",$opciones_medir_elemento));
-								?>
-			                </select>
-			            </div>
+				<div id="li_anexos" class="card-body">
 
-			            <div class="form-group col-6">
-				        	<label class="">Fecha</label>
-				        	<div class="input-group" id="capa_fecha">
-					    		<input type="text" class="form-control date" name="fecha" id="fecha" readonly="" value="<?php echo($fechai); ?>">
-					    		<div class="input-group-append" id="ejecutar_fecha">
-									<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-								</div>
-					    	</div>
-					    </div>
-
-			            <div class="form-group col-12">
-							<label class="">Medida*</label>
-							<input type="text" id="valor_medida" name="valor_medida" class="form-control required" placeholder="1.55" value="" maxlength="5">
-						</div>
-
-
-						<input type="hidden" name="fecha_mensualidad" id="fecha_mensualidad" value="">
-
-						<div class="form-group col-6 text-left">
-							<button type="button" id="registrar_medida" class="btn btn-outline-success">Registrar</button>
-						</div>
-						<div class="form-group col-6 text-right">
-							<button type="button" id="ver_graficos" class="btn btn-outline-success">Ver gr&aacute;ficos</button>
-						</div>
-					</div>
-				</form>
+				</div>
 			</div>
 		</div>
-	
 	</div>
 	
 	<div class="col-lg-4">
@@ -573,26 +521,27 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 			</div>
 			<div class="card-body">
 				<form id="mensualidad" name="mensualidad" method="post" enctype="multipart/form-data">
-			        <div class="form-group">
-			        	<label class="">Fecha inicial</label>
-			        	<div class="input-group" id="capa_fechai">
-				    		<input type="text" class="form-control date" id="fechai" readonly="" value="<?php echo($fechai); ?>">
-				    		<div class="input-group-append" id="ejecutar_fechai">
-								<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-							</div>
-				    	</div>
-				    </div>
+					<div class="row">
+				        <div class="form-group col-6">
+				        	<label class="">Fecha inicial</label>
+				        	<div class="input-group" id="capa_fechai">
+					    		<input type="text" class="form-control date" id="fechai" readonly="" value="<?php echo($fechai); ?>">
+					    		<div class="input-group-append" id="ejecutar_fechai">
+									<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+								</div>
+					    	</div>
+					    </div>
 
-				    <div class="form-group">
-			        	<label class="">Fecha final</label>
-			        	<div class="input-group" id="capa_fechaf">
-				    		<input type="text" class="form-control date" id="fechaf" readonly="" value="<?php echo($fechaf); ?>">
-				    		<div class="input-group-append" id="ejecutar_fechaf">
-								<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-							</div>
-				    	</div>
-				    </div>
-
+					    <div class="form-group col-6">
+				        	<label class="">Fecha final</label>
+				        	<div class="input-group" id="capa_fechaf">
+					    		<input type="text" class="form-control date" id="fechaf" readonly="" value="<?php echo($fechaf); ?>">
+					    		<div class="input-group-append" id="ejecutar_fechaf">
+									<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+								</div>
+					    	</div>
+					    </div>
+					</div>
 				    <div class="form-group">
 						<label class="">Valor*</label>
 						<input type="text" id="valor" name="valor" class="form-control required" value="">
@@ -676,6 +625,59 @@ if(@$imagen_usuario && file_exists($atras . $imagen_usuario)){
 			            }
 			        }
 			    </script>
+			</div>
+		</div>
+
+		<div class="card card-small mb-4">
+			<div class="card-header border-bottom">
+				<h6 class="m-0"><b>Control de medidas</b></h6>
+			</div>
+
+			<div class="card-body">
+				<form id="formulario_control_medida" name="formulario_control_medida" method="post" enctype="multipart/form-data">
+					<div class="row">
+						<div class="form-group col-6">
+			                <label>Medida corporal*</label>
+			                <select class="form-control required" id="medida_corporal" name="medida_corporal">
+			                	<option value="">Medida corporal</option>
+								<?php 
+								$opciones_medir = $conexion -> obtener_opciones_campo('medir');
+								$opciones_medir_elemento = array();
+								
+								for ($i=0; $i < $opciones_medir["cant_resultados"]; $i++) { 
+									$opciones_medir_elemento[] = '<option value="' . $opciones_medir[$i]["id"] . '">' . $opciones_medir[$i]["nombre"] . '</option>';
+								}
+								echo(implode("",$opciones_medir_elemento));
+								?>
+			                </select>
+			            </div>
+
+			            <div class="form-group col-6">
+				        	<label class="">Fecha</label>
+				        	<div class="input-group" id="capa_fecha">
+					    		<input type="text" class="form-control date" name="fecha" id="fecha" readonly="" value="<?php echo($fechai); ?>">
+					    		<div class="input-group-append" id="ejecutar_fecha">
+									<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+								</div>
+					    	</div>
+					    </div>
+
+			            <div class="form-group col-12">
+							<label class="">Medida*</label>
+							<input type="text" id="valor_medida" name="valor_medida" class="form-control required" placeholder="01.55" value="" maxlength="5">
+						</div>
+
+
+						<input type="hidden" name="fecha_mensualidad" id="fecha_mensualidad" value="">
+
+						<div class="form-group col-6 text-left">
+							<button type="button" id="registrar_medida" class="btn btn-outline-success">Registrar</button>
+						</div>
+						<div class="form-group col-6 text-right">
+							<button type="button" id="ver_graficos" class="btn btn-outline-success">Ver gr&aacute;ficos</button>
+						</div>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>

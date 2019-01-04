@@ -1,4 +1,13 @@
 <?php
+function mostrarFotoUsuario($idusu){
+	global $conexion, $atras;
+	$cadena = '';
+	$imagen = $conexion -> obtener_imagen_usuario($idusu);
+	if(file_exists($atras . $imagen) && $imagen){
+		$cadena = '<img class="user-avatar rounded-circle mr-2" src="' . $atras . $imagen . '" style="width:50px">';
+	}
+	return($cadena);
+}
 function tipo_usuario_funcion($tipo){
 	$cadena = "";
 	if($tipo == 1){

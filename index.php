@@ -10,7 +10,7 @@ echo(jquery_js());
 $movil = $conexion -> detectar_movil(1);
 
 if(@$_SESSION["idusu"]){
-	$inicio = $atras . "ventanas/ingreso/ingreso.php";
+	$inicio = $atras . "ventanas/usuario/reporte_usuarios.php";
 } else {
 	$inicio = $atras . "ventanas/ingreso/login.php";
 }

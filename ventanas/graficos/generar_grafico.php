@@ -127,14 +127,14 @@ function definir_graficos(indice, item){
 
 			            label: item.nombre,
 			            data: valores
-			        },{
+			        }/*,{
 						type: 'line',
 						label: 'Línea',
 						
 						borderColor: 'green',
 						fill: false,
 						data: valores
-					}]
+					}*/]
 			    },
 			    <?php echo($options); ?>
 			});

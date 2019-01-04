@@ -63,6 +63,7 @@ for($i=0;$i<$datos["cant_resultados"];$i++){
 	$datos[$i]["tipo_usuario_funcion"]=(tipo_usuario_funcion($datos[$i]["tipo"]));
 	$datos[$i]["estado_funcion"]=(estado_funcion($datos[$i]["estado"]));
 	$datos[$i]["dias_faltantes"]=(dias_faltantes_usuarios($datos[$i]["idusu"]));
+	$datos[$i]["mostrar_foto_usuario"]=(mostrarFotoUsuario($datos[$i]["idusu"]));
 }
 //----------------
 

@@ -70,6 +70,12 @@ function actualizar_usuario_formulario(){
 	$retorno["exito"] = 1;
 	$retorno["mensaje"] = 'Modificacion realizada';
 
+	if($idusu == @$_SESSION["idusu"]){
+		$sql1 = "select * from usuario a where a.idusu=" . $idusu;
+		$datos_usuario = $conexion -> listar_datos($sql1);
+		$conexion -> iniciar_variables_sesiones($datos_usuario);
+	}
+
 	echo json_encode($retorno);
 }
 function validar_cedula(){
@@ -360,6 +366,21 @@ function eliminar_mensualidad(){
 	$retorno["mensaje"] = "Acci&oacute;n realizada";
 
 	echo(json_encode($retorno));
+}
+function obtener_informacion_sesion(){
+	global $conexion, $atras;
+	$retorno = array();
+	$retorno["exito"] = 1;
+
+	$cadena = '';
+	$cadena .= '
+                    <img class="user-avatar rounded-circle mr-2" src="' . $atras . @$_SESSION["img"] . '" alt="User Avatar">
+                    <span class="d-none d-md-inline-block">' . @$_SESSION["nombres"] . " " .@$_SESSION["apellidos"] . '</span>
+                  ';
+
+    $retorno["datos_sesion"] = $cadena;
+
+    echo(json_encode($retorno));
 }
 
 if(@$_REQUEST["ejecutar"]){
