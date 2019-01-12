@@ -44,10 +44,27 @@ $(document).on('click','.ingresar_usuario', function(){
     success : function(respuesta){
       if(respuesta.exito){
         notificacion(respuesta.mensaje,'success',4000);
+
+        refrescarUltimoAcceso(x_idusu);
       } else {
         notificacion(respuesta.mensaje,'warning',4000);
       }
     }
   });
 });
+
+function refrescarUltimoAcceso(x_idusu){
+    $.ajax({
+        url: '<?php echo($atras); ?>ventanas/usuario/ejecutar_acciones.php',
+        type: 'POST',
+        dataType: 'json',
+        async: false,
+        data: {ejecutar: 'obtener_ultimo_acceso', idusu : x_idusu},
+        success : function(respuesta){
+            if(respuesta.exito){
+                $("#capaUltimoAcceso_" + x_idusu).html(respuesta.ultimo_acceso);
+            }
+        }
+    });
+}
 </script>

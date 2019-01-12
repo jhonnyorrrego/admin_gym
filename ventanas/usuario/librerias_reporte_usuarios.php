@@ -40,4 +40,12 @@ function dias_faltantes_usuarios($idusu){
 
 	return($cadena);
 }
+function ultimoAcceso($idusu){
+	global $conexion;
+	$ultimo_acceso = $conexion -> ultimo_acceso_usuario($idusu);
+	$cadena = '';
+	$cadena .= '<div id="capaUltimoAcceso_' . $idusu . '">' . $ultimo_acceso . '</div>';
+
+	return($cadena);
+}
 ?>

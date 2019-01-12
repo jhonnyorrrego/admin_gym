@@ -191,12 +191,78 @@ class lib_gym{
 	/*
 	funcion encargada de obtener arreglo $_FILES y realizar el proceso de guardado sobre las carpetas del servidor
 	*/
-	public function procesar_anexos($idusu, $atras){
+	public function procesar_imagen_usuario($idusu, $atras, $validarExtension=array()){
+		$retorno = array();
+		$retorno["exito"] = 1;
+
 		$idane = array();
 
 		$campos = array('fecha', 'estado', 'etiqueta', 'tamano', 'tipo', 'ruta');
 		$hoy = "date_format('" . date('Y-m-d H:i:s') . "', '%Y-%m-%d %H:%i:%s')";
 		$estado = 1;
+
+		if($validarExtension){
+			foreach ($_FILES as $key => $value) {
+				$info_anexo = pathinfo($value["name"]);
+				$extension = strtolower($info_anexo["extension"]);
+
+				if(!(in_array($extension, $validarExtension))){
+					$retorno["exito"] = 0;
+					$retorno["error"] = 'error_extension';
+					return $retorno;
+				}
+			}
+		}
+
+		foreach ($_FILES as $key => $value) {
+			$info_anexo = pathinfo($value["name"]);
+
+			$nombre = $value["name"];
+			$nuevo_nombre = rand(0,9999999) . "." . $info_anexo["extension"];
+			$tamano = $value["size"];
+			$ruta_temporal = $value["tmp_name"];
+			$extension = $info_anexo["extension"];
+
+			$ruta = $this -> parsear_ruta_almacenamiento($idusu, $atras) . $nuevo_nombre;
+
+			if($this -> resizeImage($ruta_temporal, $atras . ALMACENAMIENTO . $ruta)){
+				unlink($ruta_temporal);
+				$idanexo = $this -> insertar('anexo',$campos,array($hoy,$estado,"'" . $nombre . "'",$tamano,"'" . $extension . "'","'" . $ruta . "'"));
+				$idane[] = $idanexo;
+
+				$camposAneUsu = array('fk_idane', 'fk_idusu');
+				$this -> insertar('anexo_usuario',$camposAneUsu, array($idanexo,$idusu));
+			}
+		}
+		$retorno["idanexos"] = implode(",", $idane);
+
+		return($retorno);
+	}
+	/*
+	funcion encargada de obtener arreglo $_FILES y realizar el proceso de guardado sobre las carpetas del servidor
+	*/
+	public function procesar_anexos($idusu, $atras, $validarExtension=array()){
+		$retorno = array();
+		$retorno["exito"] = 1;
+
+		$idane = array();
+
+		$campos = array('fecha', 'estado', 'etiqueta', 'tamano', 'tipo', 'ruta');
+		$hoy = "date_format('" . date('Y-m-d H:i:s') . "', '%Y-%m-%d %H:%i:%s')";
+		$estado = 1;
+
+		if($validarExtension){
+			foreach ($_FILES as $key => $value) {
+				$info_anexo = pathinfo($value["name"]);
+				$extension = strtolower($info_anexo["extension"]);
+
+				if(!(in_array($extension, $validarExtension))){
+					$retorno["exito"] = 0;
+					$retorno["error"] = 'error_extension';
+					return $retorno;
+				}
+			}
+		}
 
 		foreach ($_FILES as $key => $value) {
 			$info_anexo = pathinfo($value["name"]);
@@ -218,8 +284,9 @@ class lib_gym{
 				$this -> insertar('anexo_usuario',$camposAneUsu, array($idanexo,$idusu));
 			}
 		}
+		$retorno["idanexos"] = implode(",", $idane);
 
-		return(implode(",", $idane));
+		return($retorno);
 	}
 	public function eliminar_anexo_usuario($idane){
 		$tabla = "anexo";
@@ -249,6 +316,44 @@ class lib_gym{
 	  	}
 	 	return($destino);
 	}
+	/*public function resizeImage($original_image_data, $original_width, $original_height, $new_width, $new_height){
+	    $dst_img = ImageCreateTrueColor($new_width, $new_height);
+	    imagecolortransparent($dst_img, imagecolorallocate($dst_img, 0, 0, 0));
+	    imagecopyresampled($dst_img, $original_image_data, 0, 0, 0, 0, $new_width, $new_height, $original_width, $original_height);
+	    return $dst_img;
+	}*/
+	public function resizeImage($nombreorig,$nombredest,$nwidth=640,$nheight=640){
+		$ext='jpg';
+		// Se obtienen las nuevas dimensiones
+		list($width, $height) = getimagesize($nombreorig);
+		if ($nwidth && ($width < $height)) {
+			//$nwidth = ($nheight / $height) * $width;
+		} else {
+			//$nheight = ($nwidth / $width) * $height;
+		}
+		$image_p = imagecreatetruecolor($nwidth,$nheight);
+		imagecolorallocate ($image_p, 255, 255, 255);
+
+		if($ext == 'gif'){
+			$image = imagecreatefromgif($nombreorig);///nombre del archivo origen
+			imagecopyresampled($image_p, $image, 0, 0, 0, 0, $nwidth, $nheight, $width, $height);
+			imagegif($image_p, $nombredest);///nombre del destino
+			imagedestroy($image_p);
+			imagedestroy($image);
+			return($nombredest);
+		} else {
+			$image = imagecreatefromjpeg($nombreorig);
+			imagecopyresampled($image_p, $image, 0, 0, 0, 0, $nwidth, $nheight, $width, $height);
+			imagejpeg($image_p, $nombredest, 80);///nombre del destino
+			imagedestroy($image_p);
+			imagedestroy($image);
+			return($nombredest);
+		}
+
+		imagedestroy($image_p);
+		imagedestroy($image);
+		return(true);
+	}
 	/*
 	obtener_texto_mensualidad
 	Recibe el idusu
@@ -268,6 +373,21 @@ class lib_gym{
 		}
 
 		return($texto);
+	}
+	/*
+	ultimo_acceso_usuario
+	Recibe idusu (entero)
+	Retorna fecha hora
+	funcion encargada de retornar el ultimo acceso que el usuario registro su entrada
+	*/
+	public function ultimo_acceso_usuario($idusu){
+		$consulta = "select date_format(a.fecha_ingreso,'%Y-%m-%d %H:%i') as x_fecha_ingreso from ingreso a where a.idusu=" . $idusu . " and a.estado=1 order by iding desc";
+		$datos = $this -> listar_datos($consulta, 0, 1);
+		if($datos["cant_resultados"]){
+			return($datos[0]["x_fecha_ingreso"]);
+		} else {
+			return('');
+		}
 	}
 	/*
 	obtener_texto_estado_usuario
@@ -401,13 +521,24 @@ class lib_gym{
 
 		return($datos);
 	}
+	/*
+	obtener_filtro_medida_grafico
+	recibe un array
+	retorna un array
+	Funcion encargada de retornar las medidas corporales y la cantidad de dias asistidos segun el filtro aplicado del array recibido
+	*/
 	public function obtener_filtro_medida_grafico($datos){
+		$retorno = array();
+
 		$where = array();
+		$where2 = array();
 		if(@$datos["fk_idusu"]){
 			$where[] = "a.fk_idusu=" . $datos["fk_idusu"];
+			$where2[] = "a.idusu=" . $datos["fk_idusu"];
 		}
 		if(@$datos["fechai"] && @$datos["fechaf"]){
 			$where[] = "(date_format(a.fecha, '%Y-%m-%d')>='" . $datos["fechai"] . "' and date_format(a.fecha, '%Y-%m-%d')<='" . $datos["fechaf"] . "')";
+			$where2[] = "(date_format(a.fecha, '%Y-%m-%d')>='" . $datos["fechai"] . "' and date_format(a.fecha, '%Y-%m-%d')<='" . $datos["fechaf"] . "')";
 		}
 		if(@$datos["medida_corporal"]){
 			$where[] = "a.medida_corporal=" . $datos["medida_corporal"];
@@ -416,7 +547,38 @@ class lib_gym{
 		$consulta1 = "select b.idmed_cor as id, b.etiqueta as nombre from medida a, medida_corporal b where a.medida_corporal=b.idmed_cor and " . implode(" and " , $where) . " group by b.idmed_cor, b.etiqueta";
 		$datos = $this -> listar_datos($consulta1);
 
-		return($datos);
+		$consulta2 = "select count(*) as cantidad from ingreso a where a.estado=1 and " . implode(" and " , $where2) . "";
+		$datos2 = $this -> listar_datos($consulta2);
+
+		$retorno["datos_medida_corporal"] = $datos;
+		$retorno["datos_dias_asistidos"] = $datos2[0]["cantidad"];
+
+		return($retorno);
+	}
+	/*
+	procesar_filtro_gestion
+	funcion encargada de recibir arreglo con filtros y retornar los datos necesarios para generar grafico
+	*/
+	public function procesar_filtro_gestion($datos){
+		$retorno = array();
+		$where1 = array();
+		$where2 = array();
+
+		if(@$datos["fechai"] && @$datos["fechaf"]){
+			$where1[] = "(date_format(a.fecha, '%Y-%m-%d')>='" . $datos["fechai"] . "' and date_format(a.fecha, '%Y-%m-%d')<='" . $datos["fechaf"] . "')";
+			$where2[] = "(date_format(a.fecha, '%Y-%m-%d')>='" . $datos["fechai"] . "' and date_format(a.fecha, '%Y-%m-%d')<='" . $datos["fechaf"] . "')";
+		}
+
+		$consulta1 = "select date_format(a.fecha, '%Y-%m') as fecha, SUM(a.valor) as valor from mensualidad a where " . implode(" and " , $where1) . " group by date_format(a.fecha, '%Y-%m')";
+		$datos1 = $this -> listar_datos($consulta1);
+
+		$consulta2 = "select date_format(a.fecha, '%Y-%m-%d') as fecha, count(*) as cantidad from ingreso a where " . implode(" and " , $where2) . " group by a.fecha";
+		$datos2 = $this -> listar_datos($consulta2);
+
+		$retorno["datos_mensualidad"] = $datos1;
+		$retorno["datos_ingreso"] = $datos2;
+
+		return($retorno);
 	}
 	/*
 	sumar_fecha
@@ -472,6 +634,17 @@ class lib_gym{
 		$_SESSION["nombres"] = $datos[0]["nombres"];
 		$_SESSION["apellidos"] = $datos[0]["apellidos"];
 		$_SESSION["img"] = $this -> obtener_imagen_usuario($datos[0]["idusu"]);
+	}
+	public function validar_acceso_sesion(){
+		global $atras;
+		if(!@$_SESSION["idusu"]){
+			?>
+			<script>
+			window.location = '<?php echo($atras); ?>ventanas/ingreso/salir.php';
+			</script>
+			<?php
+			die();
+		}
 	}
 	public function cerrar_sesion(){
 		@session_unset();

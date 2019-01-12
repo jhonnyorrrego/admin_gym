@@ -41,17 +41,30 @@ function encabezado(){
                   <i class="fas fa-users"></i>
                   <span>Usuarios</span>
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <a id="enlace_reporte_usuarios" class="dropdown-item enlaces" href="<?php echo($atras); ?>ventanas/usuario/reporte_usuarios.php" id="reporte_usuario">
+                <div class="dropdown-menu keep-open" aria-labelledby="navbarDropdown">
+                  <a id="enlace_reporte_usuarios" class="dropdown-item enlaces" href="<?php echo($atras); ?>ventanas/usuario/reporte_usuarios.php">
                     <i class="fas fa-list-ul"></i> Lista de usuarios
                    </a>
                   <a id="enlace_usuario_add" class="dropdown-item enlaces" href="<?php echo($atras); ?>ventanas/usuario/usuario_add.php" id="usuario_nuevo">
                     <i class="fas fa-user-plus"></i> Usuario nuevo
-                   </a>
+                  </a>
                   
                    <!--div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#">Something else here</a-->
                 </div>
+
+              </li>
+              <li class="nav-item">
+
+                <a class="nav-link enlaces" href="<?php echo($atras); ?>ventanas/gestion/gestion.php" id="enlace_gestion">
+                  <i class="fas fa-signal"></i>
+                  <span>Gesti&oacute;n</span>
+                </a>
+                <!--div class="dropdown-menu keep-open" aria-labelledby="navbarDropdown2">
+                  <a id="enlace_gestion" class="dropdown-item enlaces" href="<?php echo($atras); ?>ventanas/gestion/gestion.php">
+                    <i class="far fa-money-bill-alt"></i> Ingresos
+                  </a>
+                </div-->
 
               </li>
               <!--li class="nav-item">
@@ -78,40 +91,8 @@ function encabezado(){
                 </div>
               </form>
               <ul class="navbar-nav border-left flex-row ">
-                <li class="nav-item border-right dropdown notifications">
-                  <a class="nav-link nav-link-icon text-center" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <div class="nav-link-icon__wrapper">
-                      <i class="fas fa-bell"></i>
-                      <span class="badge badge-pill badge-danger">2</span>
-                    </div>
-                  </a>
-                  <div class="dropdown-menu dropdown-menu-small" aria-labelledby="dropdownMenuLink">
-                    <a class="dropdown-item" href="#">
-                      <div class="notification__icon-wrapper">
-                        <div class="notification__icon">
-                          <i class="fas fa-chart-line"></i>
-                        </div>
-                      </div>
-                      <div class="notification__content">
-                        <span class="notification__category">Analytics</span>
-                        <p>Your active users count increased by
-                          <span class="text-success text-semibold">28%</span> in the last week. Great job!</p>
-                      </div>
-                    </a>
-                    <a class="dropdown-item" href="#">
-                      <div class="notification__icon-wrapper">
-                        <div class="notification__icon">
-                          <i class="fas fa-chart-line"></i>
-                        </div>
-                      </div>
-                      <div class="notification__content">
-                        <span class="notification__category">Sales</span>
-                        <p>Last week your storeâ€™s sales count decreased by
-                          <span class="text-danger text-semibold">5.52%</span>. It could have been worse!</p>
-                      </div>
-                    </a>
-                    <a class="dropdown-item notification__all text-center" href="#"> View all Notifications </a>
-                  </div>
+                <li class="nav-item border-right dropdown notifications notificaciones" title="vencen hoy">
+                  
                 </li>
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle text-nowrap px-3 datos_sesion" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
@@ -120,7 +101,11 @@ function encabezado(){
                   </a>
                   <div class="dropdown-menu dropdown-menu-small">
                     <a class="dropdown-item" href="<?php echo($atras); ?>ventanas/usuario/ver_usuario.php?idusuario=<?php echo(@$_SESSION["idusu"]); ?>">
-                      <i class="fas fa-user"></i> Perfil</a>
+                      <i class="fas fa-user"></i> Perfil
+                    </a>
+                    <a class="dropdown-item" href="<?php echo($atras); ?>ventanas/graficos/generar_grafico.php?idusuario=<?php echo(@$_SESSION["idusu"]); ?>">
+                      <i class="fas fa-chart-bar"></i> Estad&iacute;sticas
+                    </a>
                     <!--a class="dropdown-item" href="components-blog-posts.html">
                       <i class="fas fa-list-ul"></i> Blog Posts</a>
                     <a class="dropdown-item" href="add-new-post.html">
@@ -157,6 +142,19 @@ function funciones_js_tema(){
   global $atras;
   ?>
 <script>
+$(document).ready(function(){
+  actualizar_notificacion();
+
+  $(document).on('click','.ver_usuario_notificacion',function(){
+    var idusuario = $(this).attr("idusuario");
+    var src = "<?php echo($atras); ?>ventanas/usuario/ver_usuario.php?idusuario=" + idusuario;
+    window.open(src,"_self");
+  });
+
+  $('.dropdown-toggle').on('click', function (e) {
+      $(this).next().toggle();
+  });
+});
 function actualizar_informacion_sesion(){
     $.ajax({
         url : '<?php echo($atras); ?>ventanas/usuario/ejecutar_acciones.php',
@@ -166,6 +164,19 @@ function actualizar_informacion_sesion(){
         success : function(resultado){
             if(resultado.exito){
                 $(".datos_sesion").html(resultado.datos_sesion);
+            }
+        }
+    });
+}
+function actualizar_notificacion(){
+    $.ajax({
+        url : '<?php echo($atras); ?>ventanas/usuario/ejecutar_acciones.php',
+        type : 'POST',
+        dataType: 'json',
+        data: {ejecutar: 'obtener_notificaciones_usuario'},
+        success : function(resultado){
+            if(resultado.exito){
+                $(".notificaciones").html(resultado.html_notificaciones);
             }
         }
     });

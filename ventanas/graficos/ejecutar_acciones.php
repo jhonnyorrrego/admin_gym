@@ -7,13 +7,19 @@ $raiz = $atras;
 
 function obtener_unidad_medida(){
 	global $conexion, $atras;
+	$retorno = array();
+	$retorno["exito"] = 1;
+
 	$datos_filtro = $_REQUEST;
 
 	$datos = $conexion -> obtener_filtro_medida_grafico($datos_filtro);
-	unset($datos["cant_resultados"]);
-	unset($datos["sql"]);
+	unset($datos["datos_medida_corporal"]["cant_resultados"]);
+	unset($datos["datos_medida_corporal"]["sql"]);
 
-	echo(json_encode($datos));
+	$retorno["control_medida"] = $datos["datos_medida_corporal"];
+	$retorno["dias_asistidos"] = $datos["datos_dias_asistidos"];
+
+	echo(json_encode($retorno));
 }
 function obtener_json_datos(){
 	global $conexion, $atras;

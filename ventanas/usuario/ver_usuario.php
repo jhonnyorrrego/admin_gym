@@ -5,6 +5,8 @@ include_once($atras."lib_gym.php");
 global $conexion, $raiz;
 $raiz = $atras;
 
+$conexion -> validar_acceso_sesion();
+
 include_once ($atras . 'librerias.php');
 echo(tema_dashboard_lite());
 echo(notificacion());
@@ -39,6 +41,9 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
   	</style>
 	<script type='text/javascript'>
 	$().ready(function() {
+		$("#enlace_reporte_usuarios").addClass("active");
+  		$("#navbarDropdown").click();
+
 		listar_anexos();
 		$('html, body').animate({scrollTop:0}, 'slow');
 		$('#usuario_view').validate();
@@ -70,6 +75,13 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 					if(respuesta.exito){
 						notificacion(respuesta.mensaje,'success',4000);
 						$("#anexar_imagen").attr("src",respuesta.imagen);
+
+						listar_anexos();
+						actualizar_notificacion();
+
+						<?php if($idusuario == @$_SESSION["idusu"]){ ?>
+						actualizar_informacion_sesion();//Actualiza la informacion de sesion
+						<?php } ?>
 					} else {
 						notificacion(respuesta.mensaje,'warning',4000);
 					}
@@ -206,7 +218,8 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 					if(respuesta.exito){
 						notificacion(respuesta.mensaje,'success',4000);
 						botones_usuario();
-						
+						actualizar_notificacion();
+
 						$('html, body').animate({ scrollTop: $('#capa_informacion_usuario').offset().top -80 }, 'slow');
 					} else {
 						notificacion(respuesta.mensaje,'warning',4000);
@@ -261,21 +274,23 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 			var tipo = $(this).val();
 			if(tipo == 2){//
 				$("#clave").addClass("required");
-				$("#clave").parent().parent().show(1000);
+				$("#clave").parent().parent().show(200);
 				
 				$("#clave2").addClass("required");
-				$("#clave2").parent().parent().show(1000);
+				$("#clave2").parent().parent().show(200);
 			} else {
 				$("#clave").removeClass("required");
 				$("#clave").val("");
-				$("#clave").parent().parent().hide(1000);
+				$("#clave").parent().parent().hide(200);
 				
 				$("#clave2").removeClass("required");
 				$("#clave2").val("");
-				$("#clave2").parent().parent().hide(1000);
+				$("#clave2").parent().parent().hide(200);
 				
 			}
 		});
+
+		$("#tipo").trigger("change");
 
 		$("#confirmar_ingreso").click(function(){
 			if(!confirm('Está seguro de ingresar este usuario?')){
@@ -315,6 +330,7 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 					if(respuesta.exito){
 						notificacion(respuesta.mensaje,'success',4000);
 						botones_usuario();
+						actualizar_notificacion();
 					} else {
 						notificacion(respuesta.mensaje,'warning',4000);
 					}
@@ -453,7 +469,7 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 					</div>
 					<div class="form-row" style="display: none;">
 						<div class="form-group col-md-6">
-							<label class="">Clave*</label>
+							<label class="">Nueva clave*</label>
 							<input type="password" id="clave" name="clave" class="form-control" value="">
 						</div>
 						<div class="form-group col-md-6">

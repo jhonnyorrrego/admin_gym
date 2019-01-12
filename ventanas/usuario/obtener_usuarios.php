@@ -17,6 +17,7 @@ $campo_ordenar = @$_REQUEST["sort"];
 
 $vencidos = @$_REQUEST["vencidos"];
 $por_vencerse = @$_REQUEST["por_vencerse"];
+$vencen_hoy = @$_REQUEST["vencen_hoy"];
 
 $order = "";
 $where_contenedor = array();
@@ -37,12 +38,15 @@ if($search){
 	$where_contenedor[] = " and (" . implode(" or ", $where_search) . ")";
 }
 if($vencidos){
-	$where_contenedor[] = " and date_format(fechaf,'%Y-%m-%d')<'" . $hoy . "'";
+	$where_contenedor[] = " and date_format(fechaf,'%Y-%m-%d')<='" . $hoy . "'";
 	//$order = 'order by fechaf asc';
 }
 if($por_vencerse){
 	$where_contenedor[] = " and date_format(fechaf,'%Y-%m-%d')>'" . $hoy . "'";
 	//$order = 'order by fechaf asc';
+}
+if($vencen_hoy){
+	$where_contenedor[] = " and date_format(fechaf,'%Y-%m-%d')='" . $hoy . "'";
 }
 
 $sql = "select idusu, identificacion, nombres, apellidos, email, celular, tipo, estado, date_format(fechai,'%Y-%m-%d') as x_fechai, date_format(fechaf,'%Y-%m-%d') as x_fechaf from usuario where 1=1 " . implode("",$where_contenedor) . " " . $order;
@@ -64,6 +68,7 @@ for($i=0;$i<$datos["cant_resultados"];$i++){
 	$datos[$i]["estado_funcion"]=(estado_funcion($datos[$i]["estado"]));
 	$datos[$i]["dias_faltantes"]=(dias_faltantes_usuarios($datos[$i]["idusu"]));
 	$datos[$i]["mostrar_foto_usuario"]=(mostrarFotoUsuario($datos[$i]["idusu"]));
+	$datos[$i]["ultimo_acceso"]=(ultimoAcceso($datos[$i]["idusu"]));
 }
 //----------------
 

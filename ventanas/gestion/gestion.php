@@ -15,10 +15,6 @@ echo(jquery_validate());
 echo(bootstrap_datepicker());
 echo(date_format_jquery());
 
-$idusuario = @$_REQUEST["idusuario"];
-
-$datos_usuario = $conexion -> obtener_datos_usuario($idusuario);
-
 $datasets_contenido = "
 				backgroundColor: [
 	                'rgba(255, 99, 132, 0.2)',
@@ -39,6 +35,7 @@ $datasets_contenido = "
 	            borderWidth: 1,";
 $options = "
 		options: {
+			responsive: true,
 	        scales: {
 	            yAxes: [{
 	                ticks: {
@@ -48,22 +45,23 @@ $options = "
 	        }
 	    }";
 ?>
+
 <?php echo(encabezado());?>
 <?php echo(funciones_js_tema()); ?>
 
 <script>
 $(document).ready(function(){
-	$("#enlace_reporte_usuarios").addClass("active");
-  	$("#navbarDropdown").click();
+	$("#enlace_gestion").addClass("active");
+  	$("#navbarDropdown2").click();
 
-	generar_graficos();
+  	generar_gestion();
 
 	$("#filtrar_grafico").click(function(){
-		generar_graficos();
+		generar_gestion();
 	});
 });
 
-function generar_graficos(){
+function generar_gestion(){
 	var x_fechai = $("#fechai").val();
 	var x_fechaf = $("#fechaf").val();
 
@@ -72,10 +70,14 @@ function generar_graficos(){
 		return false;
 	}
 
-	var formulario = $("#filtros_grafico");
+	var formulario = $("#filtros_gestion");
 	var data = $(formulario).serializeArray(); // convert form to array
-	data.push({name: "fk_idusu", value: '<?php echo($idusuario); ?>'});
-	data.push({name: "ejecutar", value: 'obtener_unidad_medida'});
+	data.push({name: "ejecutar", value: 'obtener_gestion'});
+
+	//
+	$("#capa_gestion").html("");//vaciar la capa cada vez que filtren
+	$("#capa_gestion").append('<div id="" class="col-lg-6"><div class="card card-small mb-4"><div class="card-header border-bottom"><h6 class="m-0"><b>Mensualidad</b></h6></div><div class="card-body p-0 border-bottom"><canvas id="grafico_1"></canvas></div><div class="card-body p-0 text-center"><h6 class="stats-small__value count my-3" id="total_mensualidad"></h6></div></div></div>');
+	$("#capa_gestion").append('<div id="" class="col-lg-6"><div class="card card-small mb-4"><div class="card-header border-bottom"><h6 class="m-0"><b>Usuarios ingresados</b></h6></div><div class="card-body p-0 border-bottom"><canvas id="grafico_2"></canvas></div><div class="card-body p-0 text-center"><h6 class="stats-small__value count my-3" id="total_ingreso"></h6></div></div></div>');
 
 	$(".cargando").show();
 
@@ -86,85 +88,90 @@ function generar_graficos(){
 		async: false,
 		data: $.param(data),
 		success : function(respuesta){
-			if(respuesta.exito){
-				$(".cargando").hide();
-				
-				$("#capa_graficos").html("");//vaciar la capa cada vez que filtren
-				$.each(respuesta.control_medida, function(indice, item){
-					$("#capa_graficos").append('<div id="capa_informacion_usuario" class="col-lg-6"><div class="card card-small mb-4"><div class="card-header border-bottom"><h6 class="m-0"><b>' + item.nombre + '</b></h6></div><div class="card-body p-0"><canvas id="grafico_' + item.id + '"></canvas></div></div></div>');
+			if(respuesta.exito && respuesta.datos_mensualidad){
+				var color = [];
+				var bordeColor = [];
+				var etiquetas = [];
+				var valores = [];
 
-					definir_graficos(indice, item);
+				$.each(respuesta.datos_mensualidad, function(indice2, item2){
+					var colorAsignar = [];
+
+					etiquetas.push(item2.etiquetas);
+					valores.push(item2.valores);
+
+					colorAsignar = colorDinamico();
+					color.push(colorAsignar[0]);
+					bordeColor.push(colorAsignar[1]);
 				});
 
-				$("#capa_dias_asistidos").html(respuesta.dias_asistidos);
+				var ctx = document.getElementById("grafico_1");
+				var myChart = new Chart(ctx, {
+				    type: 'bar',
+				    data: {
+				        labels: etiquetas,
+				        datasets: [{	
+				        	type: 'bar',
+				        	backgroundColor: color,
+				        	borderColor: bordeColor,
+				            borderWidth: 1,
+
+				            label: 'Mensualidad',
+				            data: valores
+				        }]
+				    },
+				    <?php echo($options); ?>
+				});
+
+				if(respuesta.cantidad_mensualidad){
+					$("#total_mensualidad").html("Total: " + respuesta.cantidad_mensualidad);
+				}
 			}
-		}
-	});
-}
+			if(respuesta.exito && respuesta.datos_ingreso){
+				var color = [];
+				var bordeColor = [];
+				var etiquetas = [];
+				var valores = [];
 
-function definir_graficos(indice, item){
-	var formulario = $("#filtros_grafico");
-	var data = $(formulario).serializeArray(); // convert form to array
-	data.push({name: "fk_idusu", value: '<?php echo($idusuario); ?>'});
-	data.push({name: "medida_corporal", value: item.id});
-	data.push({name: "ejecutar", value: 'obtener_json_datos'});
-	$(".cargando").show();
+				$.each(respuesta.datos_ingreso, function(indice2, item2){
+					var colorAsignar = [];
 
-	$.ajax({
-		url: 'ejecutar_acciones.php',
-		type: 'POST',
-		dataType: 'json',
-		async: false,
-		data: $.param(data),
-		success : function(respuesta){
-			var color = [];
-			var bordeColor = [];
-			var etiquetas = [];
-			var valores = [];
+					etiquetas.push(item2.etiquetas);
+					valores.push(item2.valores);
 
-			$.each(respuesta, function(indice2, item2){
-				var colorAsignar = [];
+					colorAsignar = colorDinamico();
+					color.push(colorAsignar[0]);
+					bordeColor.push(colorAsignar[1]);
+				});
 
-				etiquetas.push(item2.etiquetas);
-				valores.push(item2.valores);
+				var ctx = document.getElementById("grafico_2");
+				var myChart = new Chart(ctx, {
+				    type: 'bar',
+				    data: {
+				        labels: etiquetas,
+				        datasets: [{	
+				        	type: 'bar',
+				        	backgroundColor: color,
+				        	borderColor: bordeColor,
+				            borderWidth: 1,
 
-				colorAsignar = colorDinamico();
-				color.push(colorAsignar[0]);
-				bordeColor.push(colorAsignar[1]);
-			});
+				            label: 'Ingreso',
+				            data: valores
+				        }]
+				    },
+				    <?php echo($options); ?>
+				});
 
-			var ctx = document.getElementById("grafico_" + item.id);
-
-			var myChart = new Chart(ctx, {
-			    type: 'bar',
-			    data: {
-			        labels: etiquetas,
-			        datasets: [{	
-			        	type: 'bar',
-			        	backgroundColor: color,
-			        	borderColor: bordeColor,
-			            borderWidth: 1,
-
-			            label: item.nombre,
-			            data: valores
-			        }/*,{
-						type: 'line',
-						label: 'Línea',
-						
-						borderColor: 'green',
-						fill: false,
-						data: valores
-					}*/]
-			    },
-			    <?php echo($options); ?>
-			});
+				if(respuesta.cantidad_ingreso){
+					$("#total_ingreso").html("Total: " + respuesta.cantidad_ingreso);
+				}
+			}
 
 			$(".cargando").hide();
-
-			//$('html, body').animate({ scrollTop: $('#capa_graficos').offset().top -80 }, 'slow');
 		}
 	});
 }
+
 function colorDinamico() {
 	var color = [];
 
@@ -177,6 +184,7 @@ function colorDinamico() {
     return color
 }
 </script>
+
 <style type="text/css">
 .cargando {
     position: fixed;
@@ -193,16 +201,16 @@ function colorDinamico() {
 
 <div class="page-header row no-gutters py-4">
   <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
-    <h3 class="page-title">Gr&aacuteficos</h3>
+    <h3 class="page-title">Gesti&oacute;n</h3>
   </div>
 </div>
 
 <div class="row">
 	<?php
-	$consulta1 = "select min(date_format(fecha,'%Y-%m-%d')) as fecha_minima from medida a where a.fk_idusu=" . $idusuario . " and a.estado=1";
+	$consulta1 = "select min(date_format(fechai,'%Y-%m-%d')) as fecha_minima from mensualidad a where a.estado=1";
 	$datos1 = $conexion -> listar_datos($consulta1);
 
-	$consulta2 = "select min(date_format(fecha,'%Y-%m-%d')) as fecha_minima from ingreso a where a.idusu=" . $idusuario . " and a.estado=1";
+	$consulta2 = "select min(date_format(fecha,'%Y-%m-%d')) as fecha_minima from ingreso a where a.estado=1";
 	$datos2 = $conexion -> listar_datos($consulta2);
 
 	if($datos1[0]["fecha_minima"] && $datos2[0]["fecha_minima"] && $datos1[0]["fecha_minima"] < $datos2[0]["fecha_minima"]){
@@ -245,18 +253,8 @@ $(document).ready(function(){
 			<div class="card-header border-bottom">
 				<h6 class="m-0"><b>Filtros</b></h6>
 			</div>
-
-			<div class="card-body border-bottom">
-				<div class="row">
-					<div class="col-md-12">
-						<i class="fas fa-user mr-1"></i>
-						<strong class="mr-1"> Nombres:</strong>
-						<a href="<?php echo($atras); ?>ventanas/usuario/ver_usuario.php?idusuario=<?php echo($idusuario); ?>"><?php echo($datos_usuario[0]["nombres"] . " " . $datos_usuario[0]["apellidos"]); ?></a>
-					</div>
-				</div>
-			</div>
 			<div class="card-body">
-				<form id="filtros_grafico" name="filtros_grafico" method="post" enctype="multipart/form-data">
+				<form id="filtros_gestion" name="filtros_gestion" method="post" enctype="multipart/form-data">
 					<div class="form-row">
 				        <div class="form-group col-md-5">
 				        	<label class="">Fecha inicial</label>
@@ -288,20 +286,8 @@ $(document).ready(function(){
 			</div>
 		</div>
 	</div>
-	<div class="col-lg-2 offset-md-2">
-		<div class="card card-small mb-4">
-			<div class="card-header border-bottom">
-				<h6 class="m-0"><b>D&iacute;as asistidos</b></h6>
-			</div>
-
-			<div class="card-body text-center">
-				<h6 class="stats-small__value count my-3" id="capa_dias_asistidos"></h6>
-			</div>
-		</div>
-	</div>
 </div>
-
-<div class="row" id="capa_graficos">
+<div class="row" id="capa_gestion">
 	
 </div>
 <?php echo(pie()); ?>

@@ -5,6 +5,8 @@ include_once($atras."lib_gym.php");
 global $conexion, $raiz;
 $raiz = $atras;
 
+$conexion -> validar_acceso_sesion();
+
 include_once ($atras . 'librerias.php');
 echo(tema_dashboard_lite());
 echo(notificacion());
@@ -17,6 +19,7 @@ if (@$_SESSION["dispositivo"] == 'phone') {
 }
 ?>
 <?php echo(encabezado());?>
+<?php echo(funciones_js_tema()); ?>
 
 <style>
 .table {
@@ -30,6 +33,10 @@ table,th,td{
 $(document).ready(function(){
   $("#enlace_reporte_usuarios").addClass("active");
   $("#navbarDropdown").click();
+
+  <?php if(@$_REQUEST["vencen_hoy"]){ ?>
+  $("input[name$='vencen_hoy']").trigger('click');
+  <?php } ?>
 });
 </script>
 
@@ -47,7 +54,7 @@ $(document).ready(function(){
 				<h6 class="m-0"><b>Usuarios registrados</b></h6>
 			</div>
 			<div class="card-body">
-				<form class="text-center" id="form_table" name="form_table">
+				<form class="" id="form_table" name="form_table">
 
 					<div class="row mb-2">
 						<div class="col-md-2">
@@ -63,7 +70,7 @@ $(document).ready(function(){
 								<input type="checkbox" class="filtro_check" name="por_vencerse" value="1"> Por vencerse
 							</label>
 						</div-->
-						<fieldset class="">
+						<fieldset class="col-md-2">
 					    	<div class="custom-control custom-checkbox mb-1 text-left">
 					        	<input type="checkbox" class="custom-control-input filtro_check" name="vencidos" value="1" id="formsCheckboxChecked">
 					          	<label class="custom-control-label" for="formsCheckboxChecked">Vencidos</label>
@@ -71,6 +78,12 @@ $(document).ready(function(){
 					        <div class="custom-control custom-checkbox mb-1 text-left">
 					        	<input type="checkbox" class="custom-control-input filtro_check" name="por_vencerse" value="1" id="formsCheckboxDefault">
 					          	<label class="custom-control-label" for="formsCheckboxDefault">Por vencerse</label>
+					        </div>
+					    </fieldset>
+					    <fieldset class="col-md-2">
+					    	<div class="custom-control custom-checkbox mb-1 text-left">
+					        	<input type="checkbox" class="custom-control-input filtro_check" name="vencen_hoy" value="1" id="formsCheckbox">
+					          	<label class="custom-control-label" for="formsCheckbox">Vencen hoy</label>
 					        </div>
 					    </fieldset>
 					</div>
@@ -90,6 +103,7 @@ $(document).ready(function(){
 									<th data-field="x_fechai" data-sortable="true" data-visible="true">Fecha inicial</th>
 									<th data-field="x_fechaf" data-sortable="true" data-visible="true">Fecha final</th>
 									<th data-field="dias_faltantes" data-sortable="false" data-visible="true">Dias faltantes</th>
+									<th data-field="ultimo_acceso" data-sortable="false" data-visible="true">Ultimo acceso</th>
 									<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
 								</tr>
 							</thead>
@@ -119,6 +133,11 @@ $(document).ready(function(){
 		<div class="col-md-2 text-left mb-2">
 			<label class="checkbox-inline">
 				<input type="checkbox" class="filtro_check" name="por_vencerse" value="1"> Por vencerse
+			</label>
+		</div>
+		<div class="col-md-2 text-left mb-2">
+			<label class="checkbox-inline">
+				<input type="checkbox" class="filtro_check" name="vencen_hoy" value="1"> Vencen hoy
 			</label>
 		</div>
 	</div>

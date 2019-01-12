@@ -120,17 +120,26 @@ function consultar_existencia($identificacion,$tipo_retorno=1,$where=false){
 function guardar_imagen(){
 	global $conexion, $atras;
 	$retorno = array();
+	$valor_guardar = array();
 
 	$idusu = @$_REQUEST["idusu"];
-	$idanexos = $conexion -> procesar_anexos($idusu, $atras);
+	$extensiones = array('jpg', 'png', 'jpeg');
+	$idanexos = $conexion -> procesar_imagen_usuario($idusu, $atras, $extensiones);
+
+	if(!$idanexos["exito"] && $idanexos["error"] == 'error_extension'){
+		$retorno["exito"] = 0;
+		$retorno["mensaje"] = 'Extensiones permitidas: ' . implode(", ", $extensiones);
+		echo json_encode($retorno);
+		die();
+	}
 
 	$tabla = 'usuario';
-	$valor_guardar[] = "imagen='" . $idanexos . "'";
+	$valor_guardar[] = "imagen='" . $idanexos["idanexos"] . "'";
 	$condicion = "idusu=" . $idusu;
 
 	$conexion -> modificar($tabla,$valor_guardar,$condicion,$idusu);
 
-	if($idanexos){
+	if($idanexos["exito"]){
 		$imagen = $atras . ALMACENAMIENTO .  $conexion -> obtener_imagen_usuario($idusu);
 
 		$retorno["exito"] = 1;
@@ -139,6 +148,12 @@ function guardar_imagen(){
 	} else {
 		$retorno["exito"] = 0;
 		$retorno["mensaje"] = 'Problemas al guardar la imagen';
+	}
+
+	if($idusu == @$_SESSION["idusu"]){
+		$sql1 = "select * from usuario a where a.idusu=" . $idusu;
+		$datos_usuario = $conexion -> listar_datos($sql1);
+		$conexion -> iniciar_variables_sesiones($datos_usuario);
 	}
 
 	echo json_encode($retorno);
@@ -151,12 +166,12 @@ function guardar_anexos_usuario(){
 	$idanexos = $conexion -> procesar_anexos($idusu, $atras);
 
 	$tabla = 'usuario';
-	$valor_guardar[] = "imagen='" . $idanexos . "'";
+	$valor_guardar[] = "imagen='" . $idanexos["idanexos"] . "'";
 	$condicion = "idusu=" . $idusu;
 
 	$conexion -> modificar($tabla,$valor_guardar,$condicion,$idusu);
 
-	if($idanexos){
+	if($idanexos["exito"]){
 		$imagen = $atras . ALMACENAMIENTO .  $conexion -> obtener_imagen_usuario($idusu);
 
 		$retorno["exito"] = 1;
@@ -176,7 +191,7 @@ function guardar_anexo(){
 	$idusu = @$_REQUEST["idusu"];
 	$idanexos = $conexion -> procesar_anexos($idusu, $atras);
 
-	if($idanexos){
+	if($idanexos["exito"]){
 		$retorno["exito"] = 1;
 		$retorno["mensaje"] = 'Anexo guardado';
 	} else {
@@ -196,6 +211,7 @@ function agregar_mensualidad(){
 	$id = @$_REQUEST["id"];
 	$tabla = 'mensualidad';
 	$condicion_update = "idusu=" . $id;
+	$hoy = date('Y-m-d H:i:s');
 
 	//validacion fecha inicial no puede ser menor a una fecha final almacenada
 	$consulta1 = "select count(*) as cant from mensualidad where estado=1 and date_format(fechaf, '%Y-%m-%d')>'" . $fechai . "' and idusu=" . $id;
@@ -210,13 +226,14 @@ function agregar_mensualidad(){
 	}
 
 	//Parseando arreglo para insertar
-	$campos_insertar = array('fechai','fechaf','valor','idusu','estado');
+	$campos_insertar = array('fechai','fechaf','valor','idusu','estado','fecha');
 	$valores_insertar = array();
 	$valores_insertar[] = "date_format('" . $fechai . "', '%Y-%m-%d')";
 	$valores_insertar[] = "date_format('" . $fechaf . "', '%Y-%m-%d')";
 	$valores_insertar[] = "'" . $valor . "'";
 	$valores_insertar[] = $id;
 	$valores_insertar[] = 1;
+	$valores_insertar[] = "date_format('" . $hoy . "', '%Y-%m-%d %H:%i:%s')";
 
 	$resultado = $conexion -> insertar($tabla,$campos_insertar,$valores_insertar);
 
@@ -242,7 +259,7 @@ function listar_anexos(){
 	$retorno = array();
 	$idusu = @$_REQUEST["idusu"];
 
-	$consulta = "select a.etiqueta, a.idane from anexo a, anexo_usuario b where b.fk_idusu=" . $idusu . " and b.fk_idane=a.idane and a.estado=1";
+	$consulta = "select a.etiqueta, c.imagen, a.idane from anexo a, anexo_usuario b, usuario c where b.fk_idusu=" . $idusu . " and b.fk_idane=a.idane and a.estado=1 and c.idusu=b.fk_idusu";
 	$anexos = $conexion -> listar_datos($consulta);
 
 	if($anexos["cant_resultados"]){
@@ -252,6 +269,10 @@ function listar_anexos(){
 			$etiqueta = html_entity_decode($anexos[$i]["etiqueta"]);
 			if(strlen($etiqueta) > 25){
 				$etiqueta = substr($anexos[$i]["etiqueta"], 0, 25) . " ...";
+			}
+
+			if($anexos[$i]["idane"] == $anexos[$i]["imagen"]){
+				$etiqueta .= ' <span class="badge badge-success">Perfil</span>';
 			}
 
 			$cadena .= '<div class="row">
@@ -381,6 +402,77 @@ function obtener_informacion_sesion(){
     $retorno["datos_sesion"] = $cadena;
 
     echo(json_encode($retorno));
+}
+function obtener_ultimo_acceso(){
+	global $conexion;
+
+	$retorno = array();
+	$retorno["exito"] = 1;
+
+	$idusu = @$_REQUEST["idusu"];
+	$ultimo_acceso = $conexion -> ultimo_acceso_usuario($idusu);
+
+	$cadena = '';
+	$cadena .= '<div id="capaUltimoAcceso_' . $idusu . '">' . $ultimo_acceso . '</div>';
+
+	$retorno["ultimo_acceso"] = $cadena;
+
+	echo(json_encode($retorno));
+}
+function obtener_notificaciones_usuario(){
+	global $conexion, $atras;
+
+	$retorno = array();
+	$retorno["exito"] = 1;
+	$cadena = '';
+
+	$hoy = date('Y-m-d');
+	$consulta1 = "select a.nombres, a.apellidos, a.identificacion, a.idusu from usuario a where date_format(a.fechaf, '%Y-%m-%d')='" . $hoy . "'";
+	$consulta2 = "select count(*) as cantidad from usuario a where date_format(a.fechaf, '%Y-%m-%d')='" . $hoy . "'";
+
+	$datos = $conexion -> listar_datos($consulta1,0,5);
+	$cantidad = $conexion -> listar_datos($consulta2);
+
+	$cadena .= '
+			<a class="nav-link nav-link-icon text-center" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="nav-link-icon__wrapper">
+                  <i class="fas fa-bell"></i>
+                  <span class="badge badge-pill badge-danger">' . $cantidad[0]["cantidad"] . '</span>
+                </div>
+            </a>
+	';
+
+	if($datos["cant_resultados"]){
+		$cadena .= '<div class="dropdown-menu dropdown-menu-small" aria-labelledby="dropdownMenuLink">';
+
+		for ($i=0; $i < $datos["cant_resultados"]; $i++) { 
+			$imagen = $conexion -> obtener_imagen_usuario($datos[$i]["idusu"]);
+			$imagen_html = '';
+			if(file_exists($atras . $imagen) && $imagen){
+				$imagen_html = '<img class="user-avatar rounded-circle mr-2" src="' . $atras . $imagen . '" style="width:50px">';
+			}
+
+			$cadena .= '
+	            <a class="dropdown-item ver_usuario_notificacion" href="#" idusuario="' . $datos[$i]["idusu"] . '">
+	              <div class="notification__icon-wrapper">
+	                <div class="notification__icon">
+	                ' . $imagen_html . '
+	                </div>
+	              </div>
+	              <div class="notification__content">
+	                <span class="notification__category">' . $datos[$i]["nombres"] . ' ' . $datos[$i]["apellidos"] . '</span>
+	                <p>' . $datos[$i]["identificacion"] . '</p>
+	              </div>
+	            </a>
+			';
+		}
+
+		$cadena .= '<a class="dropdown-item notification__all text-center" href="' . $atras . 'ventanas/usuario/reporte_usuarios.php?vencen_hoy=1"> Ver todos </a>';
+	}
+
+	$retorno["html_notificaciones"] = $cadena;
+
+	echo(json_encode($retorno));
 }
 
 if(@$_REQUEST["ejecutar"]){

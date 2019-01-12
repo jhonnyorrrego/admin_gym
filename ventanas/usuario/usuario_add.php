@@ -5,12 +5,15 @@ include_once($atras."lib_gym.php");
 global $conexion, $raiz;
 $raiz = $atras;
 
+$conexion -> validar_acceso_sesion();
+
 include_once ($atras . 'librerias.php');
 echo(tema_dashboard_lite());
 echo(notificacion());
 echo(jquery_validate());
 ?>
 <?php echo(encabezado());?>
+<?php echo(funciones_js_tema()); ?>
 <style>
 .error{
 	color:red;
