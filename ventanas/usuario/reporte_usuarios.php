@@ -8,7 +8,7 @@ $raiz = $atras;
 $conexion -> validar_acceso_sesion();
 
 include_once ($atras . 'librerias.php');
-echo(tema_dashboard_lite());
+echo(tema_dashboard_lite(true));
 echo(notificacion());
 
 echo(bootstrap_table());
@@ -100,8 +100,10 @@ $(document).ready(function(){
 									<th data-field="celular" data-sortable="true" data-visible="true">Celular</th>
 									<th data-field="tipo_usuario_funcion" data-sortable="false" data-visible="true">Tipo de usuario</th>
 									<th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
+									<th data-field="tipo_pago" data-sortable="true" data-visible="true">Tipo pago</th>
 									<th data-field="x_fechai" data-sortable="true" data-visible="true">Fecha inicial</th>
 									<th data-field="x_fechaf" data-sortable="true" data-visible="true">Fecha final</th>
+									<th data-field="cantidad_dias" data-sortable="true" data-visible="true">Cantidad de d&iacute;as</th>
 									<th data-field="dias_faltantes" data-sortable="false" data-visible="true">Dias faltantes</th>
 									<th data-field="ultimo_acceso" data-sortable="false" data-visible="true">Ultimo acceso</th>
 									<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
@@ -153,8 +155,10 @@ $(document).ready(function(){
 				<th data-field="celular" data-sortable="true" data-visible="true">Celular</th>
 				<th data-field="tipo_usuario_funcion" data-sortable="false" data-visible="true">Tipo de usuario</th>
 				<th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
+				<th data-field="tipo_pago" data-sortable="true" data-visible="true">Tipo pago</th>
 				<th data-field="x_fechai" data-sortable="false" data-visible="true">Fecha inicial</th>
 				<th data-field="x_fechaf" data-sortable="false" data-visible="true">Fecha final</th>
+				<th data-field="cantidad_dias" data-sortable="true" data-visible="true">Cantidad de d&iacute;as</th>
 				<th data-field="dias_faltantes" data-sortable="false" data-visible="true">Dias faltantes</th>
 				<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
 			</tr>
@@ -214,7 +218,7 @@ $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del d
 		pageList:'All',
 		paginationVAlign: 'bottom',
 		paginationHAlign: 'left',
-		height: 2650
+		height: 3250
 	});
 	<?php } ?>
 	

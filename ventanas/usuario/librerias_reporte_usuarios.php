@@ -48,4 +48,16 @@ function ultimoAcceso($idusu){
 
 	return($cadena);
 }
+function tipoPago($tipo_mensualidad){
+	$cadena = '';
+	if($tipo_mensualidad == 1){
+		$cadena = 'Mensualidad';
+	} else if($tipo_mensualidad == 2){
+		$cadena = 'Cantidad de d&iacute;as';
+	} else {
+		$cadena = "<span class='badge badge-danger'>Sin asignaci&oacute;n</span>";
+	}
+
+	return($cadena);
+}
 ?>

@@ -10,9 +10,17 @@ echo(jquery_js());
 $movil = $conexion -> detectar_movil(1);
 
 if(@$_SESSION["idusu"]){
-	$inicio = $atras . "ventanas/usuario/reporte_usuarios.php";
+	if(@$_SESSION["tipo"] == 1){//Cliente
+		$inicio = $atras . "ventanas/usuario/ver_usuario_consulta.php";
+	} else if(@$_SESSION["tipo"] == 2){//Administrador
+		$inicio = $atras . "ventanas/usuario/reporte_usuarios.php";
+	}
 } else {
-	$inicio = $atras . "ventanas/ingreso/login.php";
+	if(@$_REQUEST["consulta"]){
+		$inicio = $atras . "ventanas/ingreso/login_consulta.php";
+	} else {
+		$inicio = $atras . "ventanas/ingreso/login.php";
+	}
 }
 
 ?>

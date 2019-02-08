@@ -49,7 +49,7 @@ if($vencen_hoy){
 	$where_contenedor[] = " and date_format(fechaf,'%Y-%m-%d')='" . $hoy . "'";
 }
 
-$sql = "select idusu, identificacion, nombres, apellidos, email, celular, tipo, estado, date_format(fechai,'%Y-%m-%d') as x_fechai, date_format(fechaf,'%Y-%m-%d') as x_fechaf from usuario where 1=1 " . implode("",$where_contenedor) . " " . $order;
+$sql = "select idusu, identificacion, nombres, apellidos, email, celular, tipo, estado, date_format(fechai,'%Y-%m-%d') as x_fechai, date_format(fechaf,'%Y-%m-%d') as x_fechaf, tipo_mensualidad, cantidad_dias from usuario where 1=1 " . implode("",$where_contenedor) . " " . $order;
 $datos = $conexion -> listar_datos($sql,$inicio,$cantidad);
 
 $arreglo = array();
@@ -69,6 +69,7 @@ for($i=0;$i<$datos["cant_resultados"];$i++){
 	$datos[$i]["dias_faltantes"]=(dias_faltantes_usuarios($datos[$i]["idusu"]));
 	$datos[$i]["mostrar_foto_usuario"]=(mostrarFotoUsuario($datos[$i]["idusu"]));
 	$datos[$i]["ultimo_acceso"]=(ultimoAcceso($datos[$i]["idusu"]));
+	$datos[$i]["tipo_pago"]=(tipoPago($datos[$i]["tipo_mensualidad"]));
 }
 //----------------
 

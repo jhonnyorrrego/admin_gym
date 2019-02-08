@@ -44,6 +44,7 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 		$("#enlace_reporte_usuarios").addClass("active");
   		$("#navbarDropdown").click();
 
+  		botones_usuario();
 		listar_anexos();
 		$('html, body').animate({scrollTop:0}, 'slow');
 		$('#usuario_view').validate();
@@ -198,8 +199,10 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 				return false;
 			}
 
+			var x_tipo = $('input:radio[name=tipo_pago]:checked').val();
 			var x_fechai = $("#fechai").val();
 			var x_fechaf = $("#fechaf").val();
+			var x_cantidad_dias = $("#cantidad_dias").val();
 			var valor_ =new String($("#valor").val());
             var x_valor = valor_.replace(/\./g,"");
 
@@ -213,7 +216,7 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 				type: 'POST',
 				dataType: 'json',
 				async: false,
-				data: {ejecutar: 'agregar_mensualidad', fechai : x_fechai, fechaf: x_fechaf, valor: x_valor, id: '<?php echo($idusuario); ?>'},
+				data: {ejecutar: 'agregar_mensualidad', tipo: x_tipo, fechai : x_fechai, fechaf: x_fechaf, cantidad_dias: x_cantidad_dias, valor: x_valor, id: '<?php echo($idusuario); ?>'},
 				success : function(respuesta){
 					if(respuesta.exito){
 						notificacion(respuesta.mensaje,'success',4000);
@@ -337,6 +340,18 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 				}
 	 		});
 	 	});
+
+	 	$(".tipo_pago").click(function(){
+	 		var tipoPago = $(this).attr('valor');
+
+	 		if(tipoPago == 1){
+	 			$("#capa_mensualidad").show();
+	 			$("#capa_cantidad_dias").hide();
+	 		} else if(tipoPago == 2){
+	 			$("#capa_cantidad_dias").show();
+	 			$("#capa_mensualidad").hide();
+	 		}
+	 	});
 	});
 
 	function botones_usuario(){
@@ -400,42 +415,6 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
                   		</button>
 					</li>
 					<li class="list-group-item p-3" id="botones_usuario">
-						<span class="d-flex mb-2">
-                          <i class="fas fa-flag mr-1"></i>
-                          <strong class="mr-1"> Estado:</strong>
-                          <div id="info_estado">
-							<?php
-								echo($conexion -> obtener_texto_estado_usuario($idusuario));
-							?>
-							</div>
-                        </span>
-                        <span class="d-flex mb-2">
-                        	<i class="far fa-calendar-alt mr-1"></i>
-                          	<strong class="mr-1"> Mensualidad:</strong>
-                          	<div id="info_mensualidad">
-							<?php
-								echo($conexion -> obtener_texto_mensualidad($idusuario));
-							?>
-							</div>
-                        </span>
-                        <span class="d-flex mb-2">
-                        	<i class="fas fa-dollar-sign mr-1"></i>
-                          	<strong class="mr-1"> Valor:</strong>
-                          	<div id="info_valor">
-							<?php
-								echo($conexion -> obtener_texto_valor($idusuario));
-							?>
-							</div>
-                        </span>
-                        <span class="d-flex mb-2">
-                        	<i class="far fa-clock mr-1"></i>
-                        	<strong class="mr-1"> D&iacute;as faltantes:</strong>
-                        	<div id="info_dias_faltantes">
-                        		<?php
-								echo($conexion -> obtener_dias_faltantes($idusuario));
-								?>
-                        	</div>
-                        </span>
 					</li>
 					<li class="list-group-item p-3 text-center">
 						<button type="button" class="mb-2 btn btn-sm btn-pill btn-outline-danger mr-2" id="eliminar_mensualidad">
@@ -533,11 +512,24 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 	<div class="col-lg-4">
 		<div class="card card-small mb-4">
 			<div class="card-header border-bottom">
-				<h6 class="m-0"><b>Mensualidad</b></h6>
+				<h6 class="m-0"><b>Tipo pago</b></h6>
 			</div>
 			<div class="card-body">
 				<form id="mensualidad" name="mensualidad" method="post" enctype="multipart/form-data">
-					<div class="row">
+
+					<div class="form-group">
+			        	<label class="">Tipo pago</label>
+			        	<br />
+			        	<div class="btn-group btn-group-toggle" data-toggle="buttons">
+                          	<label class="btn btn-white tipo_pago active" valor="1">
+                            	<input type="radio" name="tipo_pago" id="tipo_pago1" value="1" autocomplete="off" class="" checked=""> Mensualidad 
+                        	</label>
+                          	<label class="btn btn-white tipo_pago" valor="2">
+                            	<input type="radio" name="tipo_pago" id="tipo_pago2" value="2" autocomplete="off" class=""> Cantidad d&iacute;as 
+                            </label>
+                        </div>
+				    </div>
+					<div id="capa_mensualidad" class="row">
 				        <div class="form-group col-6">
 				        	<label class="">Fecha inicial</label>
 				        	<div class="input-group" id="capa_fechai">
@@ -557,6 +549,12 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 								</div>
 					    	</div>
 					    </div>
+					</div>
+					<div id="capa_cantidad_dias" style="display:none">
+						<div class="form-group">
+							<label class="">Cantidad d&iacute;as*</label>
+							<input type="text" id="cantidad_dias" name="cantidad_dias" class="form-control required number" value="">
+						</div>
 					</div>
 				    <div class="form-group">
 						<label class="">Valor*</label>
@@ -582,7 +580,7 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 			            	language : 'es',
 			           		format: 'yyyy-mm-dd',
 			           		autoclose: true,
-			           		setEndDate: new Date(<?php echo($fechaf); ?>)
+			           		setEndDate: new Date('<?php echo($fechaf); ?>')
 						}).on('changeDate',function(event){
 							var dia_mas = new Date(event.date);
 							var fechaf = new Date(event.date);
@@ -600,7 +598,7 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 			            	language : 'es',
 			           		format: 'yyyy-mm-dd',
 			           		autoclose: true,
-			           		setStartDate : new Date(<?php echo($fechai); ?>)
+			           		setStartDate : new Date('<?php echo($fechai); ?>')
 						}).on('changeDate', function(event){
 							var endDate = new Date(event.date.valueOf());
 							$('#fechai').datepicker('setEndDate', endDate);

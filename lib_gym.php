@@ -361,15 +361,23 @@ class lib_gym{
 	funcion encargada de mostrar el rango de la mensualidad asignada
 	*/
 	public function obtener_texto_mensualidad($idusu){
-		$consulta = "select date_format(fechai, '%Y-%m-%d') as x_fechai, date_format(fechaf, '%Y-%m-%d') as x_fechaf from usuario where idusu=" . $idusu;
+		$consulta = "select tipo_mensualidad, cantidad_dias,date_format(fechai, '%Y-%m-%d') as x_fechai, date_format(fechaf, '%Y-%m-%d') as x_fechaf from usuario where idusu=" . $idusu;
 		$datos = $this -> listar_datos($consulta,0,1);
 
 		$texto = "";
 
-		if($datos["cant_resultados"] && $datos[0]["x_fechai"] && $datos[0]["x_fechaf"]){
-			$texto = "<span class='badge badge-success'>Desde " . $datos[0]["x_fechai"] . " hasta " . $datos[0]["x_fechaf"] . "</span>";
-		} else {
-			$texto = "<span class='badge badge-danger'>Usuario pendiente por mensualidad</span>";
+		if($datos[0]["tipo_mensualidad"] == 1){
+			if($datos["cant_resultados"] && $datos[0]["x_fechai"] && $datos[0]["x_fechaf"]){
+				$texto = "<span class='badge badge-success'>Desde " . $datos[0]["x_fechai"] . " hasta " . $datos[0]["x_fechaf"] . "</span>";
+			} else {
+				$texto = "<span class='badge badge-danger'>Usuario pendiente por mensualidad</span>";
+			}
+		} else if($datos[0]["tipo_mensualidad"] == 2){
+			if($datos["cant_resultados"] && $datos[0]["cantidad_dias"]){
+				$texto = "<span class='badge badge-success'>" . $datos[0]["cantidad_dias"] . "</span>";
+			} else {
+				$texto = "<span class='badge badge-danger'>Usuario pendiente por mensualidad</span>";
+			}
 		}
 
 		return($texto);
@@ -398,13 +406,13 @@ class lib_gym{
 	public function obtener_texto_estado_usuario($idusu){
 		$hoy = date('Y-m-d');
 
-		$consulta = "select date_format(a.fechai, '%Y-%m-%d') as x_fechai, date_format(a.fechaf, '%Y-%m-%d') as x_fechaf, b.estado from mensualidad a, usuario b where a.idusu=b.idusu and a.idusu=" . $idusu . " order by idmen desc";
+		$consulta = "select date_format(a.fechai, '%Y-%m-%d') as x_fechai, date_format(a.fechaf, '%Y-%m-%d') as x_fechaf, b.estado,b.tipo_mensualidad,b.cantidad_dias,b.dias_faltantes from mensualidad a, usuario b where a.idusu=b.idusu and a.idusu=" . $idusu . " order by idmen desc";
 		$datos = $this -> listar_datos($consulta,0,1);
 
 		$texto = "<span class='badge badge-success'>Activo para ingresar al GYM</span>";
 
 		if(!$datos["cant_resultados"]){
-			$texto = "<span class='badge badge-danger'>Usuario pendiente por mensualidad</span>";
+			$texto = "<span class='badge badge-danger'>Usuario pendiente por asignar pago</span>";
 			return($texto);
 		}
 
@@ -413,9 +421,19 @@ class lib_gym{
 			return($texto);
 		}
 
-		if(!($hoy >= $datos[0]["x_fechai"] && $hoy <= $datos[0]["x_fechaf"])){
-			$texto = "<span class='badge badge-danger'>Fuera de rango de mensualidad</span>";
-			return($texto);	
+		if($datos[0]["tipo_mensualidad"] == 1){
+			if(!($hoy >= $datos[0]["x_fechai"] && $hoy <= $datos[0]["x_fechaf"])){
+				$texto = "<span class='badge badge-danger'>Fuera de rango de mensualidad</span>";
+				return($texto);	
+			}
+		} else if($datos[0]["tipo_mensualidad"] == 2){
+			if($datos[0]["dias_faltantes"] == 0){
+				$texto = "<span class='badge badge-danger'>D&iacute;as cumplidos</span>";
+				return($texto);	
+			}
+		} else {
+			$texto = "<span class='badge badge-danger'>Registre el tipo de pago</span>";
+				return($texto);	
 		}
 
 		return($texto);
@@ -449,8 +467,6 @@ class lib_gym{
 		return(@$datos[0]["cantidad"]);
 	}
 	public function eliminar_mensualidad_usuario($idusu){
-		$sql1 = "update usuario set fechai=null, fechaf=null, valor=null where idusu=" . $idusu;
-
 		$condicion1 = "";
 		$condicion2 = "";
 
@@ -460,6 +476,9 @@ class lib_gym{
 		$valores[] = 'fechai=null';
 		$valores[] = 'fechaf=null';
 		$valores[] = 'valor=null';
+		$valores[] = 'tipo_mensualidad=null';
+		$valores[] = 'cantidad_dias=null';
+		$valores[] = 'dias_faltantes=null';
 
 		$condicion1 = "idusu=" . $idusu;
 
@@ -481,22 +500,42 @@ class lib_gym{
 	public function obtener_dias_faltantes($idusu){
 		$datos = $this -> obtener_datos_usuario($idusu);
 
-		if($datos[0]["fechaf"]){
-			$dias_faltantes = $this -> restar_fecha($datos[0]["fechaf"],date('Y-m-d'));
+		if($datos[0]["tipo_mensualidad"] == 1){
+			if($datos[0]["fechaf"]){
+				$dias_faltantes = $this -> restar_fecha($datos[0]["fechaf"],date('Y-m-d'));
 
-			$clase = "";
+				$clase = "";
 
-			if($dias_faltantes > 5){
-				$clase = "success";
-			} else if($dias_faltantes <= 5 && $dias_faltantes > 0){
-				$clase = "warning";
-			}else {
-				$clase = "danger";
+				if($dias_faltantes > 5){
+					$clase = "success";
+				} else if($dias_faltantes <= 5 && $dias_faltantes > 0){
+					$clase = "warning";
+				}else {
+					$clase = "danger";
+				}
+
+				$cadena = '<span class="badge badge-' . $clase . '">' . $dias_faltantes . '</span>';
+			} else {
+				$cadena = '<span class="badge badge-danger">0</span>';
 			}
+		} else if($datos[0]["tipo_mensualidad"] == 2){
+			if($datos[0]["cantidad_dias"]){
+				$dias_faltantes = $datos[0]["dias_faltantes"];
 
-			$cadena = '<span class="badge badge-' . $clase . '">' . $dias_faltantes . '</span>';
-		} else {
-			$cadena = '<span class="badge badge-danger">0</span>';
+				$clase = "";
+
+				if($dias_faltantes > 5){
+					$clase = "success";
+				} else if($dias_faltantes <= 5 && $dias_faltantes > 0){
+					$clase = "warning";
+				}else {
+					$clase = "danger";
+				}
+
+				$cadena = '<span class="badge badge-' . $clase . '">' . $dias_faltantes . '</span>';
+			} else {
+				$cadena = '<span class="badge badge-danger">0</span>';
+			}
 		}
 		return($cadena);
 	}
@@ -569,10 +608,10 @@ class lib_gym{
 			$where2[] = "(date_format(a.fecha, '%Y-%m-%d')>='" . $datos["fechai"] . "' and date_format(a.fecha, '%Y-%m-%d')<='" . $datos["fechaf"] . "')";
 		}
 
-		$consulta1 = "select date_format(a.fecha, '%Y-%m') as fecha, SUM(a.valor) as valor from mensualidad a where " . implode(" and " , $where1) . " group by date_format(a.fecha, '%Y-%m')";
+		$consulta1 = "select date_format(a.fecha, '%Y-%m') as fecha, SUM(a.valor) as valor from mensualidad a where " . implode(" and " , $where1) . " and a.estado=1 group by date_format(a.fecha, '%Y-%m')";
 		$datos1 = $this -> listar_datos($consulta1);
 
-		$consulta2 = "select date_format(a.fecha, '%Y-%m-%d') as fecha, count(*) as cantidad from ingreso a where " . implode(" and " , $where2) . " group by a.fecha";
+		$consulta2 = "select date_format(a.fecha, '%Y-%m-%d') as fecha, count(*) as cantidad from ingreso a where " . implode(" and " , $where2) . " and a.estado=1 group by a.fecha";
 		$datos2 = $this -> listar_datos($consulta2);
 
 		$retorno["datos_mensualidad"] = $datos1;
@@ -636,6 +675,17 @@ class lib_gym{
 		$_SESSION["img"] = $this -> obtener_imagen_usuario($datos[0]["idusu"]);
 	}
 	public function validar_acceso_sesion(){
+		global $atras;
+		if(!@$_SESSION["idusu"] || @$_SESSION["tipo"] == 1){
+			?>
+			<script>
+			window.location = '<?php echo($atras); ?>ventanas/ingreso/salir.php';
+			</script>
+			<?php
+			die();
+		}
+	}
+	public function validar_acceso_consulta_sesion(){
 		global $atras;
 		if(!@$_SESSION["idusu"]){
 			?>

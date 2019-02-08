@@ -12,6 +12,11 @@ echo(jquery_js());
 echo(bootstrap_js());
 echo(notificacion());
 
+$adicional = '';
+if(@$_SESSION["tipo"] == 1){
+	$adicional = '?consulta=1';
+}
+
 $conexion -> cerrar_sesion();
 ?>
 <!DOCTYPE html>
@@ -38,7 +43,7 @@ $(document).ready(function() {
 	notificacion('Ha cerrado sesi&oacute;n de manera correcta','success',1400);
 	setTimeout(function(){
 		$(".cargando").hide();
-		window.parent.open("<?php echo($atras); ?>index.php", "_self");
+		window.parent.open("<?php echo($atras); ?>index.php<?php echo($adicional); ?>", "_self");
 	},1400); 
 });
 </script>

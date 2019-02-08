@@ -205,43 +205,95 @@ function agregar_mensualidad(){
 	global $conexion;
 	$retorno = array();
 
+	$tipo = @$_REQUEST["tipo"];
 	$fechai = @$_REQUEST["fechai"];
 	$fechaf = @$_REQUEST["fechaf"];
+	$cantidad_dias = @$_REQUEST["cantidad_dias"];
 	$valor = @$_REQUEST["valor"];
 	$id = @$_REQUEST["id"];
 	$tabla = 'mensualidad';
 	$condicion_update = "idusu=" . $id;
 	$hoy = date('Y-m-d H:i:s');
 
-	//validacion fecha inicial no puede ser menor a una fecha final almacenada
-	$consulta1 = "select count(*) as cant from mensualidad where estado=1 and date_format(fechaf, '%Y-%m-%d')>'" . $fechai . "' and idusu=" . $id;
-	$datosValidacion = $conexion -> listar_datos($consulta1);
-
-	if($datosValidacion[0]["cant"]){
+	$datosUsuario = $conexion -> obtener_datos_usuario($id);
+	if($datosUsuario[0]["dias_faltantes"] > 0 && $datosUsuario[0]["tipo_mensualidad"] == 2){
 		$retorno["exito"] = 0;
-		$retorno["mensaje"] = "Mensualidad asignada no disponible, intente aumentar la fecha inicial";
+		$retorno["mensaje"] = "Ya tiene un tipo de pago asignado";
 
 		echo(json_encode($retorno));
 		return(true);
 	}
+	if($hoy <= $datosUsuario[0]['fechaf'] && $datosUsuario[0]['fechaf'] && $datosUsuario[0]["tipo_mensualidad"] == 1){
+		$retorno["exito"] = 0;
+		$retorno["mensaje"] = "Ya tiene un tipo de pago asignado";
+
+		echo(json_encode($retorno));
+		return(true);	
+	}
+
+	if($tipo == 1){//Si tipo de mensualidad es rango de fechas
+		//validacion fecha inicial no puede ser menor a una fecha final almacenada
+		$consulta1 = "select count(*) as cant from mensualidad where estado=1 and date_format(fechaf, '%Y-%m-%d')>'" . $fechai . "' and idusu=" . $id;
+		$datosValidacion = $conexion -> listar_datos($consulta1);
+
+		if($datosValidacion[0]["cant"]){
+			$retorno["exito"] = 0;
+			$retorno["mensaje"] = "Mensualidad asignada no disponible, intente aumentar la fecha inicial";
+
+			echo(json_encode($retorno));
+			return(true);
+		}
+	} else if($tipo == 2){//Si tipo de mensualidad es cantidad de dias
+		if($datosUsuario[0]["dias_faltantes"] > 0){
+			$retorno["exito"] = 0;
+			$retorno["mensaje"] = "Ya tiene un tipo de pago asignado";
+
+			echo(json_encode($retorno));
+			return(true);
+		}
+	}
 
 	//Parseando arreglo para insertar
-	$campos_insertar = array('fechai','fechaf','valor','idusu','estado','fecha');
 	$valores_insertar = array();
-	$valores_insertar[] = "date_format('" . $fechai . "', '%Y-%m-%d')";
-	$valores_insertar[] = "date_format('" . $fechaf . "', '%Y-%m-%d')";
-	$valores_insertar[] = "'" . $valor . "'";
-	$valores_insertar[] = $id;
-	$valores_insertar[] = 1;
-	$valores_insertar[] = "date_format('" . $hoy . "', '%Y-%m-%d %H:%i:%s')";
+
+	if($tipo == 1){//Si tipo es mensualidad
+		$campos_insertar = array('tipo','fechai','fechaf','valor','idusu','estado','fecha');
+
+		$valores_insertar[] = $tipo;
+		$valores_insertar[] = "date_format('" . $fechai . "', '%Y-%m-%d')";
+		$valores_insertar[] = "date_format('" . $fechaf . "', '%Y-%m-%d')";
+		$valores_insertar[] = "'" . $valor . "'";
+		$valores_insertar[] = $id;
+		$valores_insertar[] = 1;
+		$valores_insertar[] = "date_format('" . $hoy . "', '%Y-%m-%d %H:%i:%s')";
+	} else if($tipo == 2){//Si tipo es cantidad de dias
+		$campos_insertar = array('tipo','cantidad_dias','dias_faltantes','valor','idusu','estado','fecha');
+
+		$valores_insertar[] = $tipo;
+		$valores_insertar[] = $cantidad_dias;
+		$valores_insertar[] = $cantidad_dias;
+		$valores_insertar[] = "'" . $valor . "'";
+		$valores_insertar[] = $id;
+		$valores_insertar[] = 1;
+		$valores_insertar[] = "date_format('" . $hoy . "', '%Y-%m-%d %H:%i:%s')";
+	}
 
 	$resultado = $conexion -> insertar($tabla,$campos_insertar,$valores_insertar);
 
-	//Parseando arreglo para modificar en la tabla del usuario
 	$valor_guardar = array();
-	$valor_guardar[] = "fechai=date_format('" . $fechai . "', '%Y-%m-%d')";
-	$valor_guardar[] = "fechaf=date_format('" . $fechaf . "', '%Y-%m-%d')";
-	$valor_guardar[] = "valor='" . $valor . "'";
+	$valor_guardar[] = "tipo_mensualidad='" . $tipo . "'";
+	if($tipo == 1){//Si tipo es mensualidad
+		//Parseando arreglo para modificar en la tabla del usuario
+		$valor_guardar[] = "fechai=date_format('" . $fechai . "', '%Y-%m-%d')";
+		$valor_guardar[] = "fechaf=date_format('" . $fechaf . "', '%Y-%m-%d')";
+		$valor_guardar[] = "valor='" . $valor . "'";
+	} else if($tipo == 2){//Si tipo es cantidad de dias
+		$valor_guardar[] = "fechai=null";
+		$valor_guardar[] = "fechaf=null";
+		$valor_guardar[] = "cantidad_dias='" . $cantidad_dias . "'";
+		$valor_guardar[] = "dias_faltantes='" . $cantidad_dias . "'";
+		$valor_guardar[] = "valor='" . $valor . "'";
+	}
 
 	$conexion -> modificar('usuario',$valor_guardar,$condicion_update,$id);
 
@@ -280,9 +332,11 @@ function listar_anexos(){
                           		<strong class="" title="' . $anexos[$i]["etiqueta"] . '">' . $etiqueta . '</strong>
                           	</div>
                           	<div class="col-3 text-right">
-                          		<i style="cursor:pointer" class="fas fa-download enlace_anexo" enlace="' . $atras . "ventanas/anexo/ver_anexo.php?idane=" . $anexos[$i]["idane"] . '"></i>
-                          		<i style="cursor:pointer" class="far fa-trash-alt enlace_anexo_eliminar" idane="' . $anexos[$i]["idane"] . '"></i>
-                          	</div>
+                          		<i style="cursor:pointer" class="fas fa-download enlace_anexo" enlace="' . $atras . "ventanas/anexo/ver_anexo.php?idane=" . $anexos[$i]["idane"] . '"></i>';
+            if(@$_SESSION["tipo"] == 2){//Administrador
+      			$cadena .= '	<i style="cursor:pointer" class="far fa-trash-alt enlace_anexo_eliminar" idane="' . $anexos[$i]["idane"] . '"></i>';
+      		}
+            $cadena .='		</div>
                          </div>';
 		}
 		$cadena .= '';
@@ -350,12 +404,16 @@ function botones_usuario(){
 	$retorno = array();
 	$idusuario = @$_REQUEST["idusu"];
 
-	$cadena = '<span class="d-flex mb-2">
+	$datosUsuario = $conexion -> obtener_datos_usuario($idusuario);
+
+	$cadena = '';
+	$cadena .= '<span class="d-flex mb-2">
 	              <i class="fas fa-flag mr-1"></i>
 	              <strong class="mr-1"> Estado:</strong>
 	              <div id="info_estado">' . $conexion -> obtener_texto_estado_usuario($idusuario) . '</div>
-	            </span>
-	            <span class="d-flex mb-2">
+	            </span>';
+	if($datosUsuario[0]["tipo_mensualidad"] == 1){//Tipo mensualidad por rango de fechas
+		$cadena .= '<span class="d-flex mb-2">
 	            	<i class="far fa-calendar-alt mr-1"></i>
 	              	<strong class="mr-1"> Mensualidad:</strong>
 	              	<div id="info_mensualidad">' . $conexion -> obtener_texto_mensualidad($idusuario) . '</div>
@@ -370,6 +428,23 @@ function botones_usuario(){
 	            	<strong class="mr-1"> D&iacute;as faltantes:</strong>
 	            	<div id="info_dias_faltantes">' . $conexion -> obtener_dias_faltantes($idusuario) . '</div>
 	            </span>';
+	} else if($datosUsuario[0]["tipo_mensualidad"] == 2){
+		$cadena .= '<span class="d-flex mb-2">
+	            	<i class="far fa-calendar-alt mr-1"></i>
+	              	<strong class="mr-1"> Cantidad de d&iacute;as:</strong>
+	              	<div id="info_mensualidad">' . $conexion -> obtener_texto_mensualidad($idusuario) . '</div>
+	            </span>
+	            <span class="d-flex mb-2">
+	            	<i class="fas fa-dollar-sign mr-1"></i>
+	              	<strong class="mr-1"> Valor:</strong>
+	              	<div id="info_valor">' . $conexion -> obtener_texto_valor($idusuario) . '</div>
+	            </span>
+	            <span class="d-flex mb-2">
+	            	<i class="far fa-clock mr-1"></i>
+	            	<strong class="mr-1"> D&iacute;as faltantes:</strong>
+	            	<div id="info_dias_faltantes">' . $conexion -> obtener_dias_faltantes($idusuario) . '</div>
+	            </span>';
+	}
 
 	$retorno["exito"] = 1;
 	$retorno["html"] = $cadena;

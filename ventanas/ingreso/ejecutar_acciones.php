@@ -18,20 +18,50 @@ function validar_ingreso(){
 	$sql = "select * from usuario a where a.estado=1 and a.identificacion='" . $identificacion . "'";
 	$datos_usuario = $conexion -> listar_datos($sql);
 	if($datos_usuario["cant_resultados"]){
-		$clave_db = $datos_usuario[0]["clave"];
-		if(metodo_encriptar($clave) == $clave_db){
-			$retorno["exito"] = 1;
-			$retorno["mensaje"] = 'Bienvenido';
+		if($datos_usuario[0]["tipo"] == 2){
+			$clave_db = $datos_usuario[0]["clave"];
+			if(metodo_encriptar($clave) == $clave_db){
+				$retorno["exito"] = 1;
+				$retorno["mensaje"] = 'Bienvenido';
 
-			$conexion -> iniciar_variables_sesiones($datos_usuario);
+				$conexion -> iniciar_variables_sesiones($datos_usuario);
 
-			echo(json_encode($retorno));
+				echo(json_encode($retorno));
+			} else {
+				$retorno["exito"] = 0;
+				$retorno["mensaje"] = 'Clave erronea';
+
+				echo(json_encode($retorno));
+			}
 		} else {
 			$retorno["exito"] = 0;
-			$retorno["mensaje"] = 'Clave erronea';
+			$retorno["mensaje"] = 'Debes ser administrador';
 
 			echo(json_encode($retorno));
 		}
+	} else {
+		$retorno["exito"] = 0;
+		$retorno["mensaje"] = 'Usuario no encontrado';
+
+		echo(json_encode($retorno));
+	}
+}
+function validar_ingreso_consulta(){
+	global $conexion;
+	$retorno = array();
+
+	$identificacion = @$_REQUEST["identificacion"];
+
+	//consulta existencia del usuario
+	$sql = "select * from usuario a where a.estado=1 and a.identificacion='" . $identificacion . "' and a.tipo=1";
+	$datos_usuario = $conexion -> listar_datos($sql);
+	if($datos_usuario["cant_resultados"]){
+		$retorno["exito"] = 1;
+		$retorno["mensaje"] = 'Bienvenido';
+
+		$conexion -> iniciar_variables_sesiones($datos_usuario);
+
+		echo(json_encode($retorno));
 	} else {
 		$retorno["exito"] = 0;
 		$retorno["mensaje"] = 'Usuario no encontrado';

@@ -27,6 +27,7 @@ function encabezado(){
               </a>
             </nav>
           </div>
+          <?php if(@$_SESSION["tipo"] == 2){//Administrador ?>
           <div class="nav-wrapper">
             <ul class="nav flex-column">
               <!--li class="nav-item">
@@ -75,6 +76,7 @@ function encabezado(){
               </li-->
             </ul>
           </div>
+          <?php } ?>
         </aside>
         <!-- End Main Sidebar -->
         <main class="main-content col-lg-10 col-md-9 col-sm-12 p-0 offset-lg-2 offset-md-3">
@@ -90,6 +92,28 @@ function encabezado(){
                   </div>
                 </div>
               </form>
+              <?php if(@$_SESSION["tipo"] == 1){//Cliente ?>
+              <ul class="navbar-nav border-left flex-row ">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle text-nowrap px-3 datos_sesion" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                    <img class="user-avatar rounded-circle mr-2" src="<?php echo($atras . @$_SESSION["img"]); ?>" alt="User Avatar">
+                    <span class="d-none d-md-inline-block"><?php echo(@$_SESSION["nombres"] . " " .@$_SESSION["apellidos"]); ?></span>
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-small">
+                    <a class="dropdown-item" href="<?php echo($atras); ?>ventanas/usuario/ver_usuario_consulta.php?idusuario=<?php echo(@$_SESSION["idusu"]); ?>">
+                      <i class="fas fa-user"></i> Perfil
+                    </a>
+                    <a class="dropdown-item" href="<?php echo($atras); ?>ventanas/graficos/generar_grafico_consulta.php?idusuario=<?php echo(@$_SESSION["idusu"]); ?>">
+                      <i class="fas fa-chart-bar"></i> Estad&iacute;sticas
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" href="<?php echo($atras); ?>ventanas/ingreso/salir.php">
+                      <i class="fas fa-power-off text-danger"></i> Salir </a>
+                  </div>
+                </li>
+              </ul>
+              <?php } ?>
+              <?php if(@$_SESSION["tipo"] == 2){//Administrador ?>
               <ul class="navbar-nav border-left flex-row ">
                 <li class="nav-item border-right dropdown notifications notificaciones" title="vencen hoy">
                   
@@ -116,12 +140,15 @@ function encabezado(){
                   </div>
                 </li>
               </ul>
+              <?php } ?>
+              <?php if(@$_SESSION["tipo"] == 2){//Administrador ?>
               <nav class="nav">
                 <a href="#" class="nav-link nav-link-icon toggle-sidebar d-md-inline d-lg-none text-center border-left" data-toggle="collapse" data-target=".header-navbar" aria-expanded="false" aria-controls="header-navbar">
                   <i class="fas fa-align-justify"></i>
                 </a>
               </nav>
             </nav>
+            <?php } ?>
           </div>
 
           <div class="main-content-container container-fluid px-4">
@@ -143,7 +170,9 @@ function funciones_js_tema(){
   ?>
 <script>
 $(document).ready(function(){
+  <?php if(@$_SESSION["tipo"] == 2){//Administrador ?>
   actualizar_notificacion();
+  <?php } ?>
 
   $(document).on('click','.ver_usuario_notificacion',function(){
     var idusuario = $(this).attr("idusuario");

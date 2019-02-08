@@ -108,7 +108,7 @@ function chart(){
 
 	return($texto);
 }
-function tema_dashboard_lite(){
+function tema_dashboard_lite($basic=null){
 	global $raiz;
 	include_once($raiz . "template/dashboard-lite/funciones_tema.php");
 	$texto='<link rel="stylesheet" type="text/css" href="' . $raiz . 'css/css/all.css">';
@@ -118,12 +118,14 @@ function tema_dashboard_lite(){
 	$texto.='<script src="' . $raiz . 'vendor/components/jquery/jquery.js"></script>';
 	$texto.='<script src="' . $raiz . 'template/dashboard-lite/externs/popper.min.js"></script>';
 	$texto.='<script src="' . $raiz . 'vendor/twbs/bootstrap/dist/js/bootstrap.js"></script>';
-	$texto.= chart();
-	$texto.='<script src="' . $raiz . 'template/dashboard-lite/externs/shards.min.js"></script>';
-	$texto.='<script src="' . $raiz . 'template/dashboard-lite/externs/jquery.sharrre.min.js"></script>';
-	$texto.='<script src="' . $raiz . 'template/dashboard-lite/scripts/extras.1.1.0.min.js"></script>';
-	$texto.='<script src="' . $raiz . 'template/dashboard-lite/scripts/shards-dashboards.1.1.0.min.js"></script>';
-	$texto.='<script src="' . $raiz . 'template/dashboard-lite/scripts/app/app-blog-overview.1.1.0.js"></script>';
+	if(!$basic){
+		$texto.= chart();
+		$texto.='<script src="' . $raiz . 'template/dashboard-lite/externs/shards.min.js"></script>';
+		$texto.='<script src="' . $raiz . 'template/dashboard-lite/externs/jquery.sharrre.min.js"></script>';
+		$texto.='<script src="' . $raiz . 'template/dashboard-lite/scripts/extras.1.1.0.min.js"></script>';
+		$texto.='<script src="' . $raiz . 'template/dashboard-lite/scripts/shards-dashboards.1.1.0.min.js"></script>';
+		$texto.='<script src="' . $raiz . 'template/dashboard-lite/scripts/app/app-blog-overview.1.1.0.js"></script>';
+	}
 	$texto.='<link rel="stylesheet" type="text/css" href="' . $raiz . 'template/dashboard-lite/styles/accents/success.1.1.0.css">';
 
 	return($texto);
