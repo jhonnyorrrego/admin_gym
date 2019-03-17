@@ -8,7 +8,7 @@ $raiz = $atras;
 $conexion -> validar_acceso_sesion();
 
 include_once ($atras . 'librerias.php');
-echo(tema_dashboard_lite(true));
+echo(tema_dashboard_lite());
 echo(notificacion());
 
 echo(bootstrap_table());
@@ -47,6 +47,13 @@ $(document).ready(function(){
 </div>
 
 <?php if(@$_SESSION["dispositivo"] == 'computer'){ ?>
+
+<style>
+#table td{
+	font-size : 9pt;
+}
+</style>
+
 <div class="row">
 	<div class="col-lg-12 cargando">
 		<div class="card card-small mb-4">
@@ -93,20 +100,20 @@ $(document).ready(function(){
 							<thead class="bg-light">
 								<tr>
 									<th data-field="mostrar_foto_usuario" data-sortable="false" data-visible="true"></th>
+									<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
 									<th data-field="identificacion" data-sortable="true" data-visible="true">Identificacion</th>
 									<th data-field="nombres" data-sortable="true" data-visible="true">Nombres</th>
 									<th data-field="apellidos" data-sortable="true" data-visible="true">Apellidos</th>
 									<th data-field="email" data-sortable="true" data-visible="true">Email</th>
 									<th data-field="celular" data-sortable="true" data-visible="true">Celular</th>
-									<th data-field="tipo_usuario_funcion" data-sortable="false" data-visible="true">Tipo de usuario</th>
+									<th data-field="tipo_usuario_funcion" data-sortable="false" data-visible="false">Tipo de usuario</th>
 									<th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
-									<th data-field="tipo_pago" data-sortable="true" data-visible="true">Tipo pago</th>
+									<th data-field="tipo_pago" data-sortable="false" data-visible="true">Tipo pago</th>
 									<th data-field="x_fechai" data-sortable="true" data-visible="true">Fecha inicial</th>
 									<th data-field="x_fechaf" data-sortable="true" data-visible="true">Fecha final</th>
 									<th data-field="cantidad_dias" data-sortable="true" data-visible="true">Cantidad de d&iacute;as</th>
 									<th data-field="dias_faltantes" data-sortable="false" data-visible="true">Dias faltantes</th>
 									<th data-field="ultimo_acceso" data-sortable="false" data-visible="true">Ultimo acceso</th>
-									<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
 								</tr>
 							</thead>
 						</table>
@@ -148,6 +155,7 @@ $(document).ready(function(){
 		<thead class="">
 			<tr>
 				<th data-field="mostrar_foto_usuario" data-sortable="false" data-visible="true"></th>
+				<th data-field="acciones_usuario" data-sortable="false" data-visible="true"></th>
 				<th data-field="identificacion" data-sortable="true" data-visible="true">Identificacion</th>
 				<th data-field="nombres" data-sortable="true" data-visible="true">Nombres</th>
 				<th data-field="apellidos" data-sortable="true" data-visible="true">Apellidos</th>
@@ -155,12 +163,11 @@ $(document).ready(function(){
 				<th data-field="celular" data-sortable="true" data-visible="true">Celular</th>
 				<th data-field="tipo_usuario_funcion" data-sortable="false" data-visible="true">Tipo de usuario</th>
 				<th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
-				<th data-field="tipo_pago" data-sortable="true" data-visible="true">Tipo pago</th>
+				<th data-field="tipo_pago" data-sortable="false" data-visible="true">Tipo pago</th>
 				<th data-field="x_fechai" data-sortable="false" data-visible="true">Fecha inicial</th>
 				<th data-field="x_fechaf" data-sortable="false" data-visible="true">Fecha final</th>
 				<th data-field="cantidad_dias" data-sortable="true" data-visible="true">Cantidad de d&iacute;as</th>
 				<th data-field="dias_faltantes" data-sortable="false" data-visible="true">Dias faltantes</th>
-				<th data-field="acciones_usuario" data-sortable="false" data-visible="true">Acciones</th>
 			</tr>
 		</thead>
 	</table>
@@ -216,7 +223,7 @@ $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del d
 		searchAlign: 'left',
 		cardView:true,
 		pageList:'All',
-		paginationVAlign: 'bottom',
+		paginationVAlign: 'both',
 		paginationHAlign: 'left',
 		height: 3250
 	});
@@ -236,6 +243,8 @@ $(document).on({
 });
 
 function procesamiento_listar(){
+	var alto_documento = $(document).height();
+
 	var data = $('#form_table').serializeObject();
 	
 	$('#table').bootstrapTable('getOptions').sidePagination = 'client';
@@ -266,6 +275,16 @@ function procesamiento_listar(){
 		},
         onLoadSuccess: function(data){
 			$("#cantidad_total").val(data.total);
+			var altoTabla = $("#table").height();
+
+			<?php if(@$_SESSION["dispositivo"] == 'computer'){ ?>
+			
+			<?php } ?>
+			<?php if(@$_SESSION["dispositivo"] == 'phone'){ ?>
+			setTimeout(function(){
+				$('#table').bootstrapTable('resetView' , {height: altoTabla+150} );
+			}, 500);
+			<?php } ?>
 		}
 	});
 }

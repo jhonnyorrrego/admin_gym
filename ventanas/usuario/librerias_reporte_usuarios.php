@@ -29,9 +29,19 @@ function estado_funcion($estado){
 function acciones_usuario($idusu){
 	global $conexion, $raiz;
 	$cadena = "";
-	$cadena .= "<button class='btn btn-light ver_usuario' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Ficha'><i class='fas fa-address-card'></i></button>";
-	$cadena .= "<button class='btn btn-light ver_grafico' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Estadisticas'><i class='fas fa-chart-bar'></i></button>";
-	$cadena .= "<button class='btn btn-light ingresar_usuario' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Ingresar'><i class='fas fa-door-open'></i></button>";
+	if(@$_SESSION["dispositivo"] == 'computer'){
+		$cadena .= '<div class="list-group">';
+		$cadena .= "<button class='btn btn-light ver_usuario list-group-item' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Ficha'><i class='fas fa-address-card'></i></button>";
+		$cadena .= "<button class='btn btn-light ver_grafico list-group-item' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Estadisticas'><i class='fas fa-chart-bar'></i></button>";
+		$cadena .= "<button class='btn btn-light ingresar_usuario list-group-item' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Ingresar'><i class='fas fa-door-open'></i></button>";
+		$cadena .= '</div>';
+	} else if(@$_SESSION["dispositivo"] == 'phone'){
+		$cadena .= '<div class="text-center">';
+		$cadena .= "<button class='btn btn-light ver_usuario' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Ficha'><i class='fas fa-address-card'></i></button>";
+		$cadena .= "<button class='btn btn-light ver_grafico' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Estadisticas'><i class='fas fa-chart-bar'></i></button>";
+		$cadena .= "<button class='btn btn-light ingresar_usuario' idusuario='" . $idusu . "' id='usuario_" . $idusu . "' title='Ingresar'><i class='fas fa-door-open'></i></button>";
+		$cadena .= '</div>';
+	}
 	return($cadena);
 }
 function dias_faltantes_usuarios($idusu){

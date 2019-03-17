@@ -206,9 +206,13 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 			var valor_ =new String($("#valor").val());
             var x_valor = valor_.replace(/\./g,"");
 
-			if(x_fechai > x_fechaf){
-				notificacion('La fecha inicial debe ser menor a la fecha final','warning',4000);
-				return false;
+            if(x_tipo == 1){
+				if(x_fechai > x_fechaf){
+					notificacion('La fecha inicial debe ser menor a la fecha final','warning',4000);
+					return false;
+				}
+			} else if(x_tipo == 2){
+
 			}
 
 			$.ajax({
@@ -310,6 +314,8 @@ $fechaf = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
 				success : function(respuesta){
 					if(respuesta.exito){
 						notificacion(respuesta.mensaje,'success',4000);
+
+						botones_usuario();
 					} else {
 						notificacion(respuesta.mensaje,'warning',4000);
 					}

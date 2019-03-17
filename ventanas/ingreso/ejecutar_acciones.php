@@ -130,6 +130,9 @@ function confirmar_ingreso_usuario(){
 		} else if($resultado["mensaje"] == 'fuera_rango'){
 			$retorno["exito"] = 0;
 			$retorno["mensaje"] = "Usuario se encuentra fuera del rango de la mensualidad";
+		} else if($resultado["mensaje"] == 'dias_agotados'){
+			$retorno["exito"] = 0;
+			$retorno["mensaje"] = "No tiene mas d&iacute;as habilitados";
 		}
 	}
 

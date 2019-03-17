@@ -47,7 +47,7 @@ class lib_gym{
 	$valor = Arreglo del(os) Valor(es) nuevo(s)
 	$condicion_update = filtro para realizar el update
 	*/
-	public function modificar($tabla,$valor,$condicion_update,$id){
+	public function modificar($tabla,$valor,$condicion_update,$id=Null){
 		$sql = "update " . $tabla . " set " . implode(",", $valor) . " where " . $condicion_update;
 		mysqli_query($this->con,$sql);
 		return(true);
@@ -133,36 +133,70 @@ class lib_gym{
 
 			return($retorno);
 		}
-		if(!($hoy >= $datos_usuario[0]["fechai"] && $hoy <= $datos_usuario[0]["fechaf"])){//Si el usuario esta fuera del rango de la mensualidad
-			$retorno["exito"] = 0;
-			$retorno["mensaje"] = "fuera_rango";
-
-			return($retorno);
-		}
-
-		$consultar_ingreso = "select * from ingreso a where a.idusu=" . $idusu . " and date_format(a.fecha,'%Y-%m-%d')='" . $hoy . "'";
+		$consultar_ingreso = "select * from ingreso a where a.idusu=" . $idusu . " and date_format(a.fecha,'%Y-%m-%d')='" . $hoy . "' and a.estado=1";
 		$ingresos_array = $this -> listar_datos($consultar_ingreso);
 		if($ingresos_array["cant_resultados"]){
 			$retorno["exito"] = 0;
 			$retorno["mensaje"] = "insertado";
 			$retorno["iding"] = $ingresos_array[0]["iding"];
-		} else {
-			$datos_usuario = $this -> obtener_datos_usuario($idusu);
-			if($datos_usuario[0]["estado"] == 2){//Inactivo
+
+			return($retorno);
+		}
+
+		if($datos_usuario[0]["tipo_mensualidad"] == 1){//Si el tipo de mensualidad es de rango de fechas
+			if(!($hoy >= $datos_usuario[0]["fechai"] && $hoy <= $datos_usuario[0]["fechaf"])){//Si el usuario esta fuera del rango de la mensualidad
 				$retorno["exito"] = 0;
-				$retorno["mensaje"] = "inactivo";
-				$retorno["iding"] = $ingresos_array[0]["iding"];
-			} else if($hoy){
-				
+				$retorno["mensaje"] = "fuera_rango";
+
+				return($retorno);
 			}
 
-			$fecha = date('Y-m-d H:i:s');
+			$iding = $this -> insertar_ingreso($idusu);
 
-			$tabla = "ingreso";
-			$campos = array('idusu', 'fecha', 'fecha_ingreso', 'estado');
-			$valores = array($idusu, "date_format('" . $hoy . "','%Y-%m-%d')", "date_format('" . $fecha . "','%Y-%m-%d %H:%i:%s')", 1);
-			$iding = $this -> insertar($tabla,$campos,$valores);
+			if($iding){//Se registra correctamente
+				$retorno["exito"] = 1;
+				$retorno["iding"] = $iding;
+			} else {//Si la DB arrojo error al violar restriccion de usuario y fecha
+				$retorno["exito"] = 0;
+				$retorno["mensaje"] = "insertado";
+			}
+			
+		} else if($datos_usuario[0]["tipo_mensualidad"] == 2){//Si el tipo de pago es de dantidad de dias
+			$consultaDatosMensualidad = "select date_format(a.fecha, '%Y-%m-%d') as x_fecha,a.dias_faltantes,a.cantidad_dias,a.idmen from mensualidad a where idusu=" . $idusu . " and a.estado=1 order by idmen desc";
+			$datosMensualidad = $this -> listar_datos($consultaDatosMensualidad);
 
+			$diasUsados = $this -> cantidadDiasUtilizados($datosMensualidad[0]["x_fecha"],$idusu);
+			$diasUsados = $diasUsados["diasUtilizados"];
+
+			if($diasUsados > $datos_usuario[0]["cantidad_dias"]){
+				$retorno["exito"] = 0;
+				$retorno["mensaje"] = "dias_agotados";
+
+				return($retorno);
+			}
+
+			if($datos_usuario[0]["dias_faltantes"] <= 0 || !$datos_usuario[0]["dias_faltantes"]){//si la cantidad de días se agotaron, no dejar ingresar.
+				$retorno["exito"] = 0;
+				$retorno["mensaje"] = "dias_agotados";
+
+				return($retorno);
+			}
+
+			$tabla = 'mensualidad';
+			$valores = array();
+			$condicion = '';
+
+			$resultadoDiasFaltantes = ($datosMensualidad[0]["cantidad_dias"] - $diasUsados) - 1;
+
+			$valores[] = "dias_faltantes='" . $resultadoDiasFaltantes . "'";
+			$condicion = "idmen=" . $datosMensualidad[0]["idmen"] . "";
+			$this -> modificar($tabla,$valores,$condicion);//Se calcula dias faltantes y se actualiza en la tabla mensualidad
+
+			$tabla = 'usuario';
+			$condicion = "idusu=" . $idusu . "";
+			$this -> modificar($tabla,$valores,$condicion);//Se calcula dias faltantes y se actualiza en la tabla usuario
+
+			$iding = $this -> insertar_ingreso($idusu);
 			if($iding){//Se registra correctamente
 				$retorno["exito"] = 1;
 				$retorno["iding"] = $iding;
@@ -173,6 +207,34 @@ class lib_gym{
 		}
 
 		return($retorno);
+	}
+	/*
+	*/
+	public function cantidadDiasUtilizados($fechaInicial,$idusu){
+		global $conexion;
+		$consultaDiasUtilizados = "select count(*) as cant_dias_utilizados from ingreso a where date_format(a.fecha_ingreso, '%Y-%m-%d')>='" . $fechaInicial . "' and a.idusu=" . $idusu . " and a.estado=1";
+		$diasUtilizados = $this -> listar_datos($consultaDiasUtilizados);
+
+		$retorno = array();
+		$retorno["diasUtilizados"] = $diasUtilizados[0]["cant_dias_utilizados"];
+
+		return($retorno);
+	}
+	/*
+	Inserciones a la base de datos sobre ingreso
+
+	@$idusu = id del usuario a registrar ingreso
+	*/
+	private function insertar_ingreso($idusu){
+		$hoy = date('Y-m-d');
+		$fecha = date('Y-m-d H:i:s');
+
+		$tabla = "ingreso";
+		$campos = array('idusu', 'fecha', 'fecha_ingreso', 'estado');
+		$valores = array($idusu, "date_format('" . $hoy . "','%Y-%m-%d')", "date_format('" . $fecha . "','%Y-%m-%d %H:%i:%s')", 1);
+		$iding = $this -> insertar($tabla,$campos,$valores);
+
+		return($iding);
 	}
 	/*
 	Funcion encargada de realizar la estructuración de las carpetas en el servidor
@@ -461,7 +523,7 @@ class lib_gym{
 	Funcion encargada de retornar la cantidad de usuarios ingresados en la fecha recibida
 	*/
 	public function total_ingresados($fecha){
-		$consulta = "select count(*) as cantidad from ingreso where date_format(fecha, '%Y-%m-%d')='" . $fecha . "'";
+		$consulta = "select count(*) as cantidad from ingreso where date_format(fecha, '%Y-%m-%d')='" . $fecha . "' and estado=1";
 		$datos = $this -> listar_datos($consulta);
 
 		return(@$datos[0]["cantidad"]);

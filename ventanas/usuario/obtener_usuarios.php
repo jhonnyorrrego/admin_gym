@@ -38,15 +38,15 @@ if($search){
 	$where_contenedor[] = " and (" . implode(" or ", $where_search) . ")";
 }
 if($vencidos){
-	$where_contenedor[] = " and date_format(fechaf,'%Y-%m-%d')<='" . $hoy . "'";
+	$where_contenedor[] = " and ((tipo_mensualidad=1 and date_format(fechaf,'%Y-%m-%d')<='" . $hoy . "') or (tipo_mensualidad=2 and dias_faltantes<0))";
 	//$order = 'order by fechaf asc';
 }
 if($por_vencerse){
-	$where_contenedor[] = " and date_format(fechaf,'%Y-%m-%d')>'" . $hoy . "'";
+	$where_contenedor[] = " and ((tipo_mensualidad=1 and date_format(fechaf,'%Y-%m-%d')>'" . $hoy . "') or (tipo_mensualidad=2 and dias_faltantes>=1))";
 	//$order = 'order by fechaf asc';
 }
 if($vencen_hoy){
-	$where_contenedor[] = " and date_format(fechaf,'%Y-%m-%d')='" . $hoy . "'";
+	$where_contenedor[] = " and (tipo_mensualidad=1 and date_format(fechaf,'%Y-%m-%d')='" . $hoy . "')";
 }
 
 $sql = "select idusu, identificacion, nombres, apellidos, email, celular, tipo, estado, date_format(fechai,'%Y-%m-%d') as x_fechai, date_format(fechaf,'%Y-%m-%d') as x_fechaf, tipo_mensualidad, cantidad_dias from usuario where 1=1 " . implode("",$where_contenedor) . " " . $order;
